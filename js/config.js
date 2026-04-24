@@ -1,7 +1,7 @@
 /* 115 高風險職訓報名前台 — 全站設定 */
 window.CONFIG = {
-  // Apps Script Web App URL（v4 已部署）
-  API_URL: "https://script.google.com/macros/s/AKfycbwBpEwX8NmWYap2lNvOWQixSPBoq4ZV1wPpnXdrnGcsnHbTPsFrFpwL4xOAHcp0immr/exec",
+  // Apps Script Web App URL（v5 已部署，manifest 精簡）
+  API_URL: "https://script.google.com/macros/s/AKfycby_b_0AZXD5Wn-oF9NLHMD6e0R0zegTVJR4jE4SyQnEllivtpRpsKInAnnj7VBq-gjH/exec",
 
   // 網站標題
   AGENCY: "臺中市政府勞工局勞動檢查處",
