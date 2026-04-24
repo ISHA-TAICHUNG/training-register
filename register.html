@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>報名 — 115 高風險職訓</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+<div class="stripe"></div>
+<header>
+  <div class="header-content">
+    <div class="brand-box">
+      <div class="brand-logo"><span>ISHA</span></div>
+      <div class="brand-text">
+        臺中市政府勞工局
+        <strong>勞 動 檢 查 處</strong>
+      </div>
+    </div>
+    <div class="year-badge">115 年度</div>
+  </div>
+</header>
+
+<div class="progress">
+  <div class="steps" id="steps-bar">
+    <div class="step" data-step="1"><div class="step-num">1</div><div class="step-label">選課程</div></div>
+    <div class="step" data-step="2"><div class="step-num">2</div><div class="step-label">勾資格</div></div>
+    <div class="step" data-step="3"><div class="step-num">3</div><div class="step-label">上傳文件</div></div>
+    <div class="step" data-step="4"><div class="step-num">4</div><div class="step-label">填寫資料</div></div>
+  </div>
+</div>
+
+<main id="app">
+  <!-- 各步驟由 app.js 動態注入 -->
+</main>
+
+<!-- DOMPurify：XSS 防護 -->
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.11/dist/purify.min.js"
+        integrity="sha384-e7LwJQ3QXqg5Vx3i1U8BlP1tBvZE8gBzGnlJg6qQk7j6PXd0bJ3yXMiY8nCc5bH1"
+        crossorigin="anonymous"></script>
+<script src="js/config.js"></script>
+<script src="js/state.js"></script>
+<script src="js/validate.js"></script>
+<script src="js/api.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

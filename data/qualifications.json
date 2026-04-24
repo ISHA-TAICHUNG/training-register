@@ -1,0 +1,80 @@
+{
+  "basic": [
+    {
+      "id": "citizen",
+      "label": "臺中市市民",
+      "required_files": [
+        { "id": "id_front", "label": "身分證正面" },
+        { "id": "id_back",  "label": "身分證反面" }
+      ],
+      "description": "設籍於臺中市之市民"
+    },
+    {
+      "id": "worker",
+      "label": "臺中市工作者",
+      "required_files": [
+        { "id": "service", "label": "服務證明" }
+      ],
+      "description": "於臺中市境內事業單位工作之勞工"
+    }
+  ],
+  "priority": [
+    {
+      "id": "aborigine",
+      "label": "原住民",
+      "required_files": [
+        { "id": "id_proof", "label": "身分證明文件" }
+      ],
+      "description": "設籍於臺灣之原住民"
+    },
+    {
+      "id": "low_income",
+      "label": "中低收入戶",
+      "required_files": [
+        { "id": "cert", "label": "中低收入戶證明文件" }
+      ],
+      "description": "經縣市社會局核定為中低收入戶者"
+    },
+    {
+      "id": "new_graduate",
+      "label": "畢業 2 年內社會新鮮人",
+      "required_files": [
+        { "id": "diploma", "label": "畢業證書（需含畢業日期）" }
+      ],
+      "description": "自畢業日起 2 年內"
+    },
+    {
+      "id": "no_employer_union",
+      "label": "無一定雇主或自營作業而參加職業工會者",
+      "required_files": [
+        { "id": "union_proof", "label": "職業工會投保證明" },
+        { "id": "affidavit",   "label": "切結書" }
+      ],
+      "description": "需同時檢附工會投保證明與切結書"
+    },
+    {
+      "id": "union_member",
+      "label": "加入職業工會者",
+      "required_files": [
+        { "id": "union_proof", "label": "職業工會投保證明" }
+      ],
+      "description": "任職勞工具職業工會會員身份"
+    },
+    {
+      "id": "small_business",
+      "label": "中小企業（勞保 50 人以下）之工作者",
+      "required_files": [
+        { "id": "insurance", "label": "事業單位近 2 個月投保人數證明" }
+      ],
+      "description": "任職事業單位之勞保投保人數 50 人以下"
+    },
+    {
+      "id": "city_employee",
+      "label": "臺中市政府所屬機關（構）員工",
+      "required_files": [
+        { "id": "service", "label": "服務證明或在職證明" }
+      ],
+      "description": "在臺中市府所屬機關服務之員工"
+    }
+  ]
+}

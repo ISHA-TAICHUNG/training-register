@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>報名成功 — 115 高風險職訓</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/main.css">
+</head>
+<body>
+
+<div class="stripe"></div>
+<header>
+  <div class="header-content">
+    <div class="brand-box">
+      <div class="brand-logo"><span>ISHA</span></div>
+      <div class="brand-text">
+        臺中市政府勞工局
+        <strong>勞 動 檢 查 處</strong>
+      </div>
+    </div>
+    <div class="year-badge">115 年度</div>
+  </div>
+</header>
+
+<main>
+  <div class="card">
+    <div class="success-hero">
+      <div class="icon">✓</div>
+      <h1>報名資料已送出</h1>
+      <div class="sub">
+        我們已收到您的報名資料與證明文件。<br>
+        承辦單位將進行資格審核，審核結果將以電話或電子郵件通知。
+      </div>
+    </div>
+
+    <div class="summary-box" id="summary"></div>
+
+    <div class="notice notice-ok" style="margin-top:20px">
+      <strong>溫馨提醒：</strong>
+      <ul style="list-style:disc;padding-left:20px;margin-top:6px;font-size:12.5px;line-height:1.85">
+        <li>請留意來電，承辦單位可能聯繫補件或通知錄取。</li>
+        <li>如需查詢報名狀態，請聯絡承辦窗口。</li>
+        <li>錄取後無故缺席者，下一年度訓練課程得不予錄取。</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="btn-bar">
+    <button class="btn btn-primary" onclick="location.href='index.html'">返回首頁</button>
+  </div>
+</main>
+
+<footer>
+  <div class="ft-title">臺中市政府勞工局　勞動檢查處</div>
+  <div class="ft-sub">OCCUPATIONAL SAFETY &amp; HEALTH · TAICHUNG</div>
+</footer>
+
+<script>
+  (function () {
+    const raw = sessionStorage.getItem("last_submission");
+    const box = document.getElementById("summary");
+    if (!raw) {
+      box.textContent = "（無最近報名紀錄）";
+      return;
+    }
+    const s = JSON.parse(raw);
+    const rows = [
+      ["報名編號", s.regId || "審核後發送"],
+      ["課程名稱", s.course ? s.course.name + " " + s.course.session : ""],
+      ["上課日期", s.course ? s.course.date : ""],
+      ["上課地點", s.course ? s.course.location : ""],
+      ["報名人姓名", s.name || ""],
+    ];
+    rows.forEach(([label, val]) => {
+      const row = document.createElement("div");
+      row.className = "row";
+      const l = document.createElement("div");
+      l.className = "label";
+      l.textContent = label;
+      const v = document.createElement("div");
+      v.className = "val";
+      v.textContent = val;
+      row.append(l, v);
+      box.append(row);
+    });
+    sessionStorage.removeItem("last_submission");
+  })();
+</script>
+</body>
+</html>

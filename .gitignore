@@ -1,0 +1,9 @@
+# 本機/編輯器
+.DS_Store
+*.swp
+.vscode/
+.idea/
+
+# 暫存
+*.tmp
+*.bak
