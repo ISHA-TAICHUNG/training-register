@@ -371,10 +371,16 @@
   // ========== STEP 4：填寫報名資料 ==========
   function renderStep4() {
     const f = state.form || {};
+    const isTraining = state.course && state.course.type === "訓練";
     renderHTML(app, `
       <div class="card">
         <h2>填寫報名資料</h2>
         <div class="sub">本資料將作為承辦單位匯入原系統使用，請確實填寫。<span style="color:#C41E3A">★ 為必填</span></div>
+        ${isTraining ? `
+        <div class="notice notice-warn" style="margin-bottom:14px">
+          <strong>提醒：</strong>每人限報 2 門訓練課程（依身分證認定）。若已超過上限，送出時系統會通知。職安衛宣導會不受此限制。
+        </div>
+        ` : ''}
         <form id="reg-form" novalidate>
           <input type="text" name="website" class="honeypot" tabindex="-1" autocomplete="off">
 
