@@ -818,6 +818,7 @@
         files: state.files,
         form: state.form,
         submittedAt: new Date().toISOString(),
+        consentAt: sessionStorage.getItem("consent_at") || null,  // 個資告知書同意時間
       };
       const res = await API.submitRegistration(payload);
       sessionStorage.setItem("last_submission", JSON.stringify({
