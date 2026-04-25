@@ -150,7 +150,9 @@
             ${cats.map(c => {
               const items = catMap.get(c) || [];
               const shortName = (items[0] && items[0].cat_short) || c;
-              return `<div class="cat-tab ${c === activeCat ? "active" : ""}" data-cat="${escape(c)}">${escape(shortName)}<span class="count">${items.length}</span></div>`;
+              // 宣導會 → 顯示為「宣導會（在職回訓）」
+              const displayName = shortName === "宣導會" ? "宣導會（在職回訓）" : shortName;
+              return `<div class="cat-tab ${c === activeCat ? "active" : ""}" data-cat="${escape(c)}">${escape(displayName)}<span class="count">${items.length}</span></div>`;
             }).join("")}
           </div>
           <div id="course-list">${renderCourseList()}</div>
