@@ -42,9 +42,39 @@
   let COURSES_STATUS = null;
   API.fetchCoursesStatus().then(s => {
     COURSES_STATUS = s;
-    // 若目前正在 Step 1，重新 render 以顯示名額
     if (state.step === 1 && window.__rerenderStep1) window.__rerenderStep1();
   });
+
+  // 載入郵遞區號對照表（非阻塞）
+  let ZIP_TO_AREA = {};
+  let AREA_TO_ZIP = {};
+  fetch("data/zipcodes.json")
+    .then(r => r.json())
+    .then(data => {
+      ZIP_TO_AREA = data;
+      Object.entries(data).forEach(([zip, area]) => {
+        // area 如 "臺中市東區"；加「台」的版本一起對應（使用者可能打「台中市」）
+        AREA_TO_ZIP[area] = zip;
+        if (area.startsWith("臺")) AREA_TO_ZIP[area.replace(/^臺/, "台")] = zip;
+      });
+    })
+    .catch(() => {});
+
+  // 地址 → 找最相符的郵遞區號
+  function addrToZip(addr) {
+    if (!addr) return "";
+    const normalized = addr.replace(/^台/, "臺");  // 統一以「臺」比對
+    // 找最長匹配前綴
+    let bestZip = "";
+    let bestLen = 0;
+    for (const [area, zip] of Object.entries(AREA_TO_ZIP)) {
+      if (normalized.startsWith(area) && area.length > bestLen) {
+        bestZip = zip;
+        bestLen = area.length;
+      }
+    }
+    return bestZip;
+  }
 
   function updateProgress(n) {
     document.querySelectorAll(".step").forEach(el => {
@@ -372,6 +402,9 @@
   function renderStep4() {
     const f = state.form || {};
     const isTraining = state.course && state.course.type === "訓練";
+    // 學歷下拉（依使用者指定）
+    const EDUCATION_OPTIONS = ["博士","研究所以上","大學","專科","高中(職)","國中","國小","不識字"];
+
     renderHTML(app, `
       <div class="card">
         <h2>填寫報名資料</h2>
@@ -403,9 +436,9 @@
           </div>
           <div class="form-2col">
             <div class="form-row" data-field="birthday">
-              <label>生日（民國 yyymmdd） <span class="req">★</span></label>
-              <input type="text" name="birthday" placeholder="例：0750101" value="${escape(f.birthday || '')}" maxlength="7" required>
-              <div class="hint">7 碼數字，例 0750101 = 民國 75 年 1 月 1 日</div>
+              <label>生日（民國 7 碼） <span class="req">★</span></label>
+              <input type="text" name="birthday" placeholder="例：0810516" value="${escape(f.birthday || '')}" maxlength="7" required>
+              <div class="hint">7 碼數字，例 0810516 = 民國 81 年 5 月 16 日</div>
               <div class="err">生日格式錯誤</div>
             </div>
             <div class="form-row" data-field="id_card">
@@ -426,25 +459,53 @@
               <div class="err">Email 格式錯誤</div>
             </div>
           </div>
-          <div class="form-row" data-field="education">
-            <label>學歷</label>
-            <select name="education">
-              <option value="">請選擇</option>
-              ${["國小","國中","高中","高職","專科","大學","研究所"].map(v =>
-                `<option value="${escape(v)}" ${f.education === v ? 'selected' : ''}>${escape(v)}</option>`).join("")}
-            </select>
-          </div>
-          <div class="form-row" data-field="school">
-            <label>畢業學校</label>
-            <input type="text" name="school" value="${escape(f.school || '')}">
+          <div class="form-2col">
+            <div class="form-row" data-field="education">
+              <label>學歷</label>
+              <select name="education">
+                <option value="">請選擇</option>
+                ${EDUCATION_OPTIONS.map(v =>
+                  `<option value="${escape(v)}" ${f.education === v ? 'selected' : ''}>${escape(v)}</option>`).join("")}
+              </select>
+            </div>
+            <div class="form-row" data-field="school">
+              <label>畢業學校</label>
+              <input type="text" name="school" placeholder="不填則自動帶入學歷名稱" value="${escape(f.school || '')}">
+            </div>
           </div>
 
           <div class="form-group">
-            <div class="form-group-title">二、聯絡資訊</div>
+            <div class="form-group-title">二、戶籍地址</div>
+            <div class="form-2col">
+              <div class="form-row" data-field="reg_zip">
+                <label>戶籍郵遞區號</label>
+                <input type="text" name="reg_zip" maxlength="3" placeholder="例：403" value="${escape(f.reg_zip || '')}">
+                <div class="hint" id="reg_zip_hint" style="color:var(--brand)">${f.reg_zip && ZIP_TO_AREA[f.reg_zip] ? escape(ZIP_TO_AREA[f.reg_zip]) : '輸入 3 碼郵遞區號自動帶出縣市區'}</div>
+              </div>
+              <div class="form-row">
+                <label>&nbsp;</label>
+                <div style="padding:8px 0;font-size:12.5px">
+                  <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
+                    <input type="checkbox" id="reg_same" style="width:auto;margin:0" ${f.reg_same ? 'checked' : ''}>
+                    <span>戶籍同聯絡地址（下方）</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+            <div class="form-row" data-field="reg_addr">
+              <label>戶籍地址</label>
+              <input type="text" name="reg_addr" placeholder="例：臺中市西區忠明南路..." value="${escape(f.reg_addr || '')}">
+              <div class="hint">輸入縣市區後郵遞區號會自動填入</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <div class="form-group-title">三、聯絡資訊</div>
             <div class="form-2col">
               <div class="form-row" data-field="contact_zip">
                 <label>聯絡地址郵遞區號</label>
-                <input type="text" name="contact_zip" maxlength="6" placeholder="例：403" value="${escape(f.contact_zip || '')}">
+                <input type="text" name="contact_zip" maxlength="3" placeholder="例：403" value="${escape(f.contact_zip || '')}">
+                <div class="hint" id="contact_zip_hint" style="color:var(--brand)">${f.contact_zip && ZIP_TO_AREA[f.contact_zip] ? escape(ZIP_TO_AREA[f.contact_zip]) : '輸入 3 碼郵遞區號自動帶出縣市區'}</div>
               </div>
               <div class="form-row" data-field="contact_phone">
                 <label>市話</label>
@@ -468,25 +529,37 @@
           </div>
 
           <div class="form-group">
-            <div class="form-group-title">三、任職單位（如適用）</div>
+            <div class="form-group-title">四、任職單位（選填）</div>
+            <div class="hint" style="margin-bottom:8px;color:var(--muted)">若未任職或不欲填寫公司資訊，此區可略過。系統會自動標示為「個人在職中」。</div>
             <div class="form-2col">
               <div class="form-row" data-field="company_name">
                 <label>公司名稱</label>
-                <input type="text" name="company_name" value="${escape(f.company_name || '')}">
+                <input type="text" name="company_name" placeholder="不填則自動帶「個人在職中」" value="${escape(f.company_name || '')}">
               </div>
               <div class="form-row" data-field="company_tax">
                 <label>公司統編</label>
                 <input type="text" name="company_tax" maxlength="8" value="${escape(f.company_tax || '')}">
               </div>
             </div>
-            <div class="form-row" data-field="company_addr">
-              <label>公司地址</label>
-              <input type="text" name="company_addr" value="${escape(f.company_addr || '')}">
-            </div>
             <div class="form-2col">
+              <div class="form-row" data-field="company_zip">
+                <label>公司地址郵遞區號</label>
+                <input type="text" name="company_zip" maxlength="3" placeholder="例：403" value="${escape(f.company_zip || '')}">
+                <div class="hint" id="company_zip_hint" style="color:var(--brand)">${f.company_zip && ZIP_TO_AREA[f.company_zip] ? escape(ZIP_TO_AREA[f.company_zip]) : '輸入 3 碼郵遞區號自動帶出縣市區'}</div>
+              </div>
               <div class="form-row" data-field="company_phone">
                 <label>公司電話</label>
                 <input type="text" name="company_phone" value="${escape(f.company_phone || '')}">
+              </div>
+            </div>
+            <div class="form-row" data-field="company_addr">
+              <label>公司地址</label>
+              <input type="text" name="company_addr" placeholder="例：臺中市西區..." value="${escape(f.company_addr || '')}">
+            </div>
+            <div class="form-2col">
+              <div class="form-row" data-field="company_contact">
+                <label>負責訓練聯絡人</label>
+                <input type="text" name="company_contact" placeholder="（公司內承接訓練事務之人員）" value="${escape(f.company_contact || '')}">
               </div>
               <div class="form-row" data-field="position">
                 <label>現任職務</label>
@@ -495,41 +568,48 @@
             </div>
           </div>
 
+          ${state.course.type === "宣導會" ? `
           <div class="form-group">
-            <div class="form-group-title">四、補充（選填）</div>
-            ${state.course.type === "宣導會" ? `
-              <div class="notice notice-info" style="font-size:12px;margin-bottom:10px">
-                <strong>回訓證明專用：</strong>若需領取回訓證明，請填寫原結業證書證號（技術士證號）並上傳證書影本。
-                如不需回訓證明，此區可略過。
-              </div>
-              <div class="form-row" data-field="prev_cert">
-                <label>原結業證書證號（技術士證號）</label>
-                <input type="text" name="prev_cert" value="${escape(f.prev_cert || '')}" placeholder="例：安良中X證字第12345號　或　技術士總編號 151-12345">
-              </div>
-              <div class="form-row">
-                <label>上傳證書影本</label>
-                <div class="file-list" id="cert-file-list">
-                  ${(state.files.qual_cert || []).map((f, i) => `
-                    <div class="file-item">
-                      <span class="icon">✓</span>
-                      <span class="name">${escape(f.name)}</span>
-                      <span class="size">${formatSize(f.size)}</span>
-                      <span class="remove-cert" data-idx="${i}">✕ 移除</span>
-                    </div>
-                  `).join("")}
-                </div>
-                <label class="upload-btn upload-btn-single">
-                  <div class="ub-icon">📷 📎</div>
-                  <div class="ub-label">上傳檔案 或 拍照</div>
-                  <div class="ub-hint">手機可選擇相機、相簿或檔案</div>
-                  <input type="file" id="file-cert" accept="${escape(CONFIG.FILE_ACCEPT_EXT)}" multiple>
-                </label>
-              </div>
-            ` : ``}
-            <div class="form-row" data-field="note">
-              <label>備註</label>
-              <textarea name="note" rows="2" placeholder="如有特殊說明請於此填寫">${escape(f.note || '')}</textarea>
+            <div class="form-group-title">五、回訓證書（選填）</div>
+            <div class="notice notice-info" style="font-size:12px;margin-bottom:10px">
+              <strong>回訓證明專用：</strong>若需領取回訓證明，請填寫原結業證書證號（技術士證號）並上傳證書影本。
+              如不需回訓證明，此區可略過。
             </div>
+            <div class="form-row" data-field="prev_cert">
+              <label>原結業證書證號（技術士證號）</label>
+              <input type="text" name="prev_cert" value="${escape(f.prev_cert || '')}" placeholder="例：安良中X證字第12345號　或　技術士總編號 151-12345">
+            </div>
+            <div class="form-row">
+              <label>上傳證書影本</label>
+              <div class="file-list" id="cert-file-list">
+                ${(state.files.qual_cert || []).map((f, i) => `
+                  <div class="file-item">
+                    <span class="icon">✓</span>
+                    <span class="name">${escape(f.name)}</span>
+                    <span class="size">${formatSize(f.size)}</span>
+                    <span class="remove-cert" data-idx="${i}">✕ 移除</span>
+                  </div>
+                `).join("")}
+              </div>
+              <label class="upload-btn upload-btn-single">
+                <div class="ub-icon">📷 📎</div>
+                <div class="ub-label">上傳檔案 或 拍照</div>
+                <div class="ub-hint">手機可選擇相機、相簿或檔案</div>
+                <input type="file" id="file-cert" accept="${escape(CONFIG.FILE_ACCEPT_EXT)}" multiple>
+              </label>
+            </div>
+          </div>
+          ` : ``}
+
+          <div class="notice notice-info" style="margin-top:16px">
+            <strong>備註欄將自動帶入您勾選的資格：</strong>
+            ${(state.qualifications || []).length > 0 ?
+              (state.qualifications.map(qid => {
+                const all = [...(QUALS.basic||[]), ...(QUALS.priority||[])];
+                const q = all.find(x => x.id === qid);
+                return q ? q.label : qid;
+              }).join("；"))
+              : "（尚未勾選）"}
           </div>
         </form>
         <div class="notice notice-warn" style="margin-top:16px">
@@ -545,6 +625,71 @@
 
     document.getElementById("btn-back").addEventListener("click", () => { collectForm(); go(3); });
     document.getElementById("btn-submit").addEventListener("click", submitRegistration);
+
+    // === 郵遞區號 ↔ 地址 雙向聯動 ===
+    function bindZipAddr(zipName, addrName, hintId) {
+      const zipEl = document.querySelector(`[name="${zipName}"]`);
+      const addrEl = document.querySelector(`[name="${addrName}"]`);
+      const hintEl = document.getElementById(hintId);
+      if (!zipEl || !addrEl) return;
+
+      // 輸入郵號 → 顯示縣市區
+      zipEl.addEventListener("input", () => {
+        const z = zipEl.value.trim();
+        const area = ZIP_TO_AREA[z];
+        if (hintEl) hintEl.textContent = area || (z ? "查無此郵號" : "輸入 3 碼郵遞區號自動帶出縣市區");
+        // 若地址為空或只含舊的縣市區前綴，則自動填縣市區
+        if (area && (!addrEl.value.trim() || /^[臺台][北中南市][縣市].{2,4}[區市鄉鎮]/.test(addrEl.value))) {
+          // 如果地址空 → 填縣市區當前綴
+          if (!addrEl.value.trim()) addrEl.value = area;
+        }
+      });
+
+      // 輸入地址 → 自動抓郵號
+      addrEl.addEventListener("input", () => {
+        const matched = addrToZip(addrEl.value);
+        if (matched && zipEl.value !== matched) {
+          zipEl.value = matched;
+          if (hintEl) hintEl.textContent = ZIP_TO_AREA[matched] || "";
+        }
+      });
+    }
+    bindZipAddr("reg_zip", "reg_addr", "reg_zip_hint");
+    bindZipAddr("contact_zip", "contact_addr", "contact_zip_hint");
+    bindZipAddr("company_zip", "company_addr", "company_zip_hint");
+
+    // === 「戶籍同聯絡地址」勾選 ===
+    const regSame = document.getElementById("reg_same");
+    const syncFromContact = () => {
+      const cz = document.querySelector('[name="contact_zip"]');
+      const ca = document.querySelector('[name="contact_addr"]');
+      const rz = document.querySelector('[name="reg_zip"]');
+      const ra = document.querySelector('[name="reg_addr"]');
+      if (!regSame || !regSame.checked) return;
+      if (rz) { rz.value = cz?.value || ""; rz.dispatchEvent(new Event("input")); }
+      if (ra) { ra.value = ca?.value || ""; }
+    };
+    if (regSame) {
+      regSame.addEventListener("change", () => {
+        const rz = document.querySelector('[name="reg_zip"]');
+        const ra = document.querySelector('[name="reg_addr"]');
+        if (!rz || !ra) return;
+        rz.disabled = regSame.checked;
+        ra.disabled = regSame.checked;
+        if (regSame.checked) syncFromContact();
+      });
+      // 初次進入時如勾選則同步、disable
+      if (regSame.checked) {
+        document.querySelector('[name="reg_zip"]').disabled = true;
+        document.querySelector('[name="reg_addr"]').disabled = true;
+        syncFromContact();
+      }
+      // 當聯絡地址變動且勾選同上時，同步
+      ["contact_zip", "contact_addr"].forEach(n => {
+        const el = document.querySelector(`[name="${n}"]`);
+        if (el) el.addEventListener("input", syncFromContact);
+      });
+    }
 
     // 宣導會專屬：證書上傳
     if (state.course.type === "宣導會") {
@@ -644,9 +789,16 @@
     btn.textContent = "送出中…";
 
     try {
+      // 把勾選的資格 id 轉成 label（給後端填入備註欄）
+      const allQuals = [...(QUALS.basic || []), ...(QUALS.priority || [])];
+      const qualification_labels = (state.qualifications || []).map(qid => {
+        const q = allQuals.find(x => x.id === qid);
+        return q ? q.label : qid;
+      });
       const payload = {
         course: state.course,
         qualifications: state.qualifications,
+        qualification_labels,
         files: state.files,
         form: state.form,
         submittedAt: new Date().toISOString(),
