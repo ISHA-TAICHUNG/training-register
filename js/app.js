@@ -299,7 +299,7 @@
       renderHTML(app, `
         <div class="card">
           <h2>上傳證明文件</h2>
-          <div class="sub">支援 JPG、PNG、PDF 或手機拍照，單檔不超過 10 MB。請務必上傳清晰可辨識的檔案。</div>
+          <div class="sub">支援 JPG、PNG、PDF 或手機拍照，單檔不超過 10 MB（手機拍的高畫質照片會自動壓縮，無需手動處理）。請務必上傳清晰可辨識的檔案。</div>
           <div>
             ${allGroups.map(g => `
               <div class="upload-group" data-gid="${escape(g.id)}">
@@ -323,7 +323,7 @@
                 <label class="upload-btn upload-btn-single" data-gid="${escape(g.id)}">
                   <div class="ub-icon">📷 📎</div>
                   <div class="ub-label">上傳檔案 或 拍照</div>
-                  <div class="ub-hint">手機可選擇相機、相簿或檔案；支援 JPG / PNG / PDF，≤ 10MB</div>
+                  <div class="ub-hint">手機可選擇相機、相簿或檔案；支援 JPG / PNG / PDF（高畫質照片會自動壓縮）</div>
                   <input type="file" accept="${escape(CONFIG.FILE_ACCEPT_EXT)}" multiple data-gid="${escape(g.id)}">
                 </label>
               </div>
@@ -380,9 +380,14 @@
       const files = Array.from(e.target.files || []);
       const grp = allGroups.find(g => g.id === gid);
       const fileLabel = grp ? grp.fileLabel : gid;
-      for (const f of files) {
-        if (!Validate.fileType(f)) { alert(`不支援的檔案類型：${f.name}\n僅支援 JPG、PNG、PDF`); continue; }
-        if (!Validate.fileSize(f)) { alert(`檔案過大：${f.name}\n單檔不得超過 10 MB`); continue; }
+      for (const original of files) {
+        if (!Validate.fileType(original)) { alert(`不支援的檔案類型：${original.name}\n僅支援 JPG、PNG、PDF`); continue; }
+        // 自動壓縮（圖片 > 2MB 才壓）
+        const f = await API.compressImage(original);
+        if (!Validate.fileSize(f)) {
+          alert(`檔案過大：${original.name}\n壓縮後仍超過 10 MB，請重新拍攝或挑選較小的檔案`);
+          continue;
+        }
         const b64 = await API.fileToBase64(f);
         if (!state.files[gid]) state.files[gid] = [];
         state.files[gid].push({
@@ -715,9 +720,13 @@
       };
 
       const handleCertFiles = async (files) => {
-        for (const f of Array.from(files || [])) {
-          if (!Validate.fileType(f)) { alert(`不支援的檔案類型：${f.name}`); continue; }
-          if (!Validate.fileSize(f)) { alert(`檔案過大：${f.name}`); continue; }
+        for (const original of Array.from(files || [])) {
+          if (!Validate.fileType(original)) { alert(`不支援的檔案類型：${original.name}`); continue; }
+          const f = await API.compressImage(original);
+          if (!Validate.fileSize(f)) {
+            alert(`檔案過大：${original.name}\n壓縮後仍超過 10 MB，請重新拍攝或挑選較小的檔案`);
+            continue;
+          }
           const b64 = await API.fileToBase64(f);
           if (!state.files.qual_cert) state.files.qual_cert = [];
           state.files.qual_cert.push({

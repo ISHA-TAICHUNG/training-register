@@ -77,5 +77,44 @@
     });
   }
 
-  window.API = { submitRegistration, fileToBase64, fetchCoursesStatus };
+  /**
+   * 自動壓縮圖片：> 2MB 才壓；長邊縮到 2000px、quality 0.85（再次過大 quality 0.7）
+   * - 影像格式（image/*）才壓縮；PDF 不動
+   * - 失敗（HEIC 桌機解不出）回原檔，由原 fileSize 驗證接手提示
+   * - 壓縮後一律輸出 JPEG（檔案小、相容廣）
+   */
+  async function compressImage(file) {
+    const MIN = 2 * 1024 * 1024;        // < 2MB 不壓
+    const MAX_DIM = 2000;               // 長邊
+    if (!file.type || !file.type.startsWith("image/")) return file;
+    if (file.size < MIN) return file;
+    try {
+      const bitmap = await createImageBitmap(file);
+      const { width, height } = bitmap;
+      const ratio = Math.min(MAX_DIM / Math.max(width, height), 1);
+      const w = Math.round(width * ratio);
+      const h = Math.round(height * ratio);
+      const canvas = document.createElement("canvas");
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(bitmap, 0, 0, w, h);
+      // 第一次嘗試 quality 0.85
+      let blob = await new Promise(res => canvas.toBlob(res, "image/jpeg", 0.85));
+      // 還是太大 → 降到 0.7
+      if (blob && blob.size > 10 * 1024 * 1024) {
+        blob = await new Promise(res => canvas.toBlob(res, "image/jpeg", 0.7));
+      }
+      if (!blob) return file;
+      const newName = (file.name || "image").replace(/\.[^.]+$/, "") + ".jpg";
+      const compressed = new File([blob], newName, { type: "image/jpeg", lastModified: Date.now() });
+      // 若壓出來反而更大（小圖片不該壓），保留原檔
+      return compressed.size < file.size ? compressed : file;
+    } catch (e) {
+      console.warn("壓縮失敗，回原檔", e);
+      return file;
+    }
+  }
+
+  window.API = { submitRegistration, fileToBase64, fetchCoursesStatus, compressImage };
 })();
