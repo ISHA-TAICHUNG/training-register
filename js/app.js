@@ -483,21 +483,10 @@
 
           <div class="form-group">
             <div class="form-group-title">二、戶籍地址</div>
-            <div class="form-2col">
-              <div class="form-row" data-field="reg_zip">
-                <label>戶籍郵遞區號</label>
-                <input type="text" name="reg_zip" maxlength="3" placeholder="例：403" value="${escape(f.reg_zip || '')}">
-                <div class="hint" id="reg_zip_hint" style="color:var(--brand)">${f.reg_zip && ZIP_TO_AREA[f.reg_zip] ? escape(ZIP_TO_AREA[f.reg_zip]) : '輸入 3 碼郵遞區號自動帶出縣市區'}</div>
-              </div>
-              <div class="form-row">
-                <label>&nbsp;</label>
-                <div style="padding:8px 0;font-size:12.5px">
-                  <label style="display:flex;align-items:center;gap:6px;cursor:pointer">
-                    <input type="checkbox" id="reg_same" style="width:auto;margin:0" ${f.reg_same ? 'checked' : ''}>
-                    <span>戶籍同聯絡地址（下方）</span>
-                  </label>
-                </div>
-              </div>
+            <div class="form-row" data-field="reg_zip">
+              <label>戶籍郵遞區號</label>
+              <input type="text" name="reg_zip" maxlength="3" placeholder="例：403" value="${escape(f.reg_zip || '')}">
+              <div class="hint" id="reg_zip_hint" style="color:var(--brand)">${f.reg_zip && ZIP_TO_AREA[f.reg_zip] ? escape(ZIP_TO_AREA[f.reg_zip]) : '輸入 3 碼郵遞區號自動帶出縣市區'}</div>
             </div>
             <div class="form-row" data-field="reg_addr">
               <label>戶籍地址</label>
@@ -508,6 +497,12 @@
 
           <div class="form-group">
             <div class="form-group-title">三、聯絡資訊</div>
+            <div class="form-row" style="margin-bottom:12px;background:#EEF2F8;padding:10px 12px;border-radius:6px">
+              <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-weight:500;color:var(--brand)">
+                <input type="checkbox" id="contact_same" style="width:auto;margin:0;transform:scale(1.2)" ${f.contact_same ? 'checked' : ''}>
+                <span>聯絡地址同戶籍 <span style="font-weight:400;font-size:12.5px">（勾選後自動帶入上方戶籍郵遞區號與地址）</span></span>
+              </label>
+            </div>
             <div class="form-2col">
               <div class="form-row" data-field="contact_zip">
                 <label>聯絡地址郵遞區號</label>
@@ -659,36 +654,36 @@
     bindZipAddr("contact_zip", "contact_addr", "contact_zip_hint");
     bindZipAddr("company_zip", "company_addr", "company_zip_hint");
 
-    // === 「戶籍同聯絡地址」勾選 ===
-    const regSame = document.getElementById("reg_same");
-    const syncFromContact = () => {
-      const cz = document.querySelector('[name="contact_zip"]');
-      const ca = document.querySelector('[name="contact_addr"]');
+    // === 「聯絡地址同戶籍」勾選（戶籍是主資料；聯絡複製自戶籍）===
+    const contactSame = document.getElementById("contact_same");
+    const syncFromReg = () => {
       const rz = document.querySelector('[name="reg_zip"]');
       const ra = document.querySelector('[name="reg_addr"]');
-      if (!regSame || !regSame.checked) return;
-      if (rz) { rz.value = cz?.value || ""; rz.dispatchEvent(new Event("input")); }
-      if (ra) { ra.value = ca?.value || ""; }
+      const cz = document.querySelector('[name="contact_zip"]');
+      const ca = document.querySelector('[name="contact_addr"]');
+      if (!contactSame || !contactSame.checked) return;
+      if (cz) { cz.value = rz?.value || ""; cz.dispatchEvent(new Event("input")); }
+      if (ca) { ca.value = ra?.value || ""; }
     };
-    if (regSame) {
-      regSame.addEventListener("change", () => {
-        const rz = document.querySelector('[name="reg_zip"]');
-        const ra = document.querySelector('[name="reg_addr"]');
-        if (!rz || !ra) return;
-        rz.disabled = regSame.checked;
-        ra.disabled = regSame.checked;
-        if (regSame.checked) syncFromContact();
+    if (contactSame) {
+      contactSame.addEventListener("change", () => {
+        const cz = document.querySelector('[name="contact_zip"]');
+        const ca = document.querySelector('[name="contact_addr"]');
+        if (!cz || !ca) return;
+        cz.disabled = contactSame.checked;
+        ca.disabled = contactSame.checked;
+        if (contactSame.checked) syncFromReg();
       });
       // 初次進入時如勾選則同步、disable
-      if (regSame.checked) {
-        document.querySelector('[name="reg_zip"]').disabled = true;
-        document.querySelector('[name="reg_addr"]').disabled = true;
-        syncFromContact();
+      if (contactSame.checked) {
+        document.querySelector('[name="contact_zip"]').disabled = true;
+        document.querySelector('[name="contact_addr"]').disabled = true;
+        syncFromReg();
       }
-      // 當聯絡地址變動且勾選同上時，同步
-      ["contact_zip", "contact_addr"].forEach(n => {
+      // 當戶籍地址變動且勾選同上時，自動更新聯絡
+      ["reg_zip", "reg_addr"].forEach(n => {
         const el = document.querySelector(`[name="${n}"]`);
-        if (el) el.addEventListener("input", syncFromContact);
+        if (el) el.addEventListener("input", syncFromReg);
       });
     }
 
