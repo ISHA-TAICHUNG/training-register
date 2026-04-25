@@ -52,8 +52,9 @@
       <div class="hero-stat"><div class="v">$0</div><div class="l">FREE 免費</div></div>
     </div>
 
-    <div class="cta-row">
-      <button class="cta cta-primary" id="btn-start">立即報名 →</button>
+    <div class="cta-row" style="display:flex;gap:10px;flex-wrap:wrap">
+      <button class="cta cta-primary" id="btn-start" style="flex:1;min-width:180px">立即報名 →</button>
+      <button class="cta" id="btn-lookup" style="flex:1;min-width:180px;background:#fff;color:#0057B8;border:2px solid #0057B8">📋 查詢報名狀態</button>
     </div>
   </div>
 </section>
@@ -101,6 +102,42 @@
   <div class="ft-title">臺中市政府勞工局　勞動檢查處</div>
   <div class="ft-sub">OCCUPATIONAL SAFETY &amp; HEALTH · TAICHUNG</div>
 </footer>
+
+<!-- ===== 報名狀態查詢 Modal ===== -->
+<div id="lookup-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;align-items:center;justify-content:center;padding:16px;overflow-y:auto">
+  <div style="background:#fff;border-radius:12px;max-width:500px;width:100%;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,0.3)">
+    <div style="background:#0057B8;color:#fff;padding:14px 20px;border-radius:12px 12px 0 0;font-size:16px;font-weight:700;display:flex;align-items:center;gap:8px">
+      <span>📋</span><span id="lookup-title">查詢報名狀態</span>
+    </div>
+    <div id="lookup-body" style="padding:24px 22px;font-size:14px;line-height:1.7;color:#333">
+      <!-- 表單階段 -->
+      <div id="lookup-form-area">
+        <p style="margin-bottom:16px;color:#666;font-size:13px">請輸入您的姓名與身分證後 5 碼，查詢目前的報名狀態。</p>
+        <label style="display:block;margin-bottom:14px">
+          <span style="display:block;font-weight:600;margin-bottom:6px">姓名</span>
+          <input type="text" id="lookup-name" placeholder="例：王小明" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;font-size:15px;box-sizing:border-box;font-family:inherit">
+        </label>
+        <label style="display:block;margin-bottom:8px">
+          <span style="display:block;font-weight:600;margin-bottom:6px">身分證後 5 碼</span>
+          <input type="text" id="lookup-id5" placeholder="例：23456" maxlength="5" inputmode="numeric" pattern="[A-Za-z0-9]{5}" style="width:100%;padding:10px;border:1px solid #ccc;border-radius:6px;font-size:15px;box-sizing:border-box;font-family:inherit;letter-spacing:2px;text-align:center">
+        </label>
+        <p style="color:#999;font-size:12px;margin-top:6px">※ 例：身分證 A123456789，後 5 碼即為 56789</p>
+        <div id="lookup-error" style="color:#c0392b;font-size:13px;margin-top:10px;display:none"></div>
+      </div>
+      <!-- 結果階段 -->
+      <div id="lookup-result-area" style="display:none">
+        <div id="lookup-result-icon" style="text-align:center;font-size:48px;margin-bottom:12px"></div>
+        <div id="lookup-result-title" style="font-size:17px;font-weight:700;text-align:center;margin-bottom:14px"></div>
+        <div id="lookup-result-msg" style="background:#F8FAFD;border-radius:8px;padding:14px 16px;font-size:13.5px;line-height:1.85;white-space:pre-wrap"></div>
+        <div id="lookup-result-info" style="font-size:12px;color:#888;margin-top:10px;text-align:center"></div>
+      </div>
+    </div>
+    <div style="padding:14px 20px;border-top:1px solid #e5e5e5;background:#F8FAFD;border-radius:0 0 12px 12px;display:flex;gap:10px">
+      <button id="lookup-close" style="flex:1;padding:10px;border:1px solid #ccc;background:#fff;border-radius:6px;font-family:inherit;font-size:14px;cursor:pointer">關閉</button>
+      <button id="lookup-submit" style="flex:1;padding:10px;border:none;background:#0057B8;color:#fff;border-radius:6px;font-family:inherit;font-size:14px;font-weight:700;cursor:pointer">查詢</button>
+    </div>
+  </div>
+</div>
 
 <!-- ===== 個資同意書 Modal ===== -->
 <div id="consent-modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.55);z-index:9999;align-items:center;justify-content:center;padding:16px;overflow-y:auto">
@@ -183,6 +220,156 @@
   modal.addEventListener("click", (e) => {
     if (e.target === modal) modal.style.display = "none";
   });
+
+  // ===== 報名狀態查詢 =====
+  const lookupModal = document.getElementById("lookup-modal");
+  const lookupBtn = document.getElementById("btn-lookup");
+  const lookupClose = document.getElementById("lookup-close");
+  const lookupSubmit = document.getElementById("lookup-submit");
+  const lookupName = document.getElementById("lookup-name");
+  const lookupId5 = document.getElementById("lookup-id5");
+  const lookupErr = document.getElementById("lookup-error");
+  const formArea = document.getElementById("lookup-form-area");
+  const resultArea = document.getElementById("lookup-result-area");
+  const lookupTitle = document.getElementById("lookup-title");
+
+  function openLookup() {
+    lookupModal.style.display = "flex";
+    formArea.style.display = "block";
+    resultArea.style.display = "none";
+    lookupErr.style.display = "none";
+    lookupSubmit.style.display = "block";
+    lookupTitle.textContent = "查詢報名狀態";
+    lookupName.value = "";
+    lookupId5.value = "";
+    lookupName.focus();
+  }
+  function closeLookup() { lookupModal.style.display = "none"; }
+
+  lookupBtn.addEventListener("click", openLookup);
+  lookupClose.addEventListener("click", closeLookup);
+  lookupModal.addEventListener("click", (e) => { if (e.target === lookupModal) closeLookup(); });
+
+  // 6 種狀態的親切訊息（emoji + 多教室電話）
+  const STATUS_MESSAGES = {
+    "待審": {
+      icon: "⏳",
+      title: "我們收到您的報名囉！",
+      msg: "您的資料正在審查中，承辦人員會仔細確認您的證明文件。\n\n通常需要 3–5 個工作天，請耐心等候 🙏\n\n感謝您的耐心，審查結果出來後我們會主動通知您。",
+    },
+    "通過": {
+      icon: "✅",
+      title: "恭喜您！審核通過 🎊",
+      msg: "您的資格已通過審核，準備為您安排上課事宜。\n\n承辦人員稍後會把您的資料匯入至本中心系統，大約 1–3 個工作天，請耐心等候。\n\n上課當天請記得攜帶身分證正本喔！",
+    },
+    "已匯出": {
+      icon: "🎉",
+      title: "您已成功登錄至本中心系統！",
+      msg: "太棒了！您的報名已完成所有審核流程，正在為您自動跳轉至本中心系統頁面...\n\n如未自動跳轉，請點下方按鈕。",
+    },
+    "補件": {
+      icon: "📝",
+      title: "您的資料需要補件",
+      msg: "我們在審查您的資料時發現需要您補充一些文件。\n\n請主動與本中心聯繫，我們會協助您完成補件。\n\n📞 復興教室　04-22249535\n📞 忠明教室　04-22608999\n📞 龍井教室　04-26336999\n\n上班時間 09:00–17:30",
+    },
+    "拒絕": {
+      icon: "💌",
+      title: "很抱歉，這次未能通過審核",
+      msg: "您的這次報名經審查後未能通過資格審核。\n\n如果您想了解原因或需要協助，歡迎與本中心聯繫，我們會詳細為您說明。\n\n📞 復興教室　04-22249535\n📞 忠明教室　04-22608999\n📞 龍井教室　04-26336999\n\n也歡迎您報名其他符合資格的課程喔 😊",
+    },
+    "取消": {
+      icon: "ℹ️",
+      title: "您的報名已取消",
+      msg: "您的這次報名已被取消。\n\n如非您本人申請取消，或有任何疑問，請儘速與本中心聯繫確認。\n\n📞 復興教室　04-22249535\n📞 忠明教室　04-22608999\n📞 龍井教室　04-26336999",
+    },
+  };
+
+  async function doLookup() {
+    const name = lookupName.value.trim();
+    const id5 = lookupId5.value.trim().toUpperCase();
+    lookupErr.style.display = "none";
+    if (!name) { lookupErr.textContent = "請輸入姓名"; lookupErr.style.display = "block"; return; }
+    if (!/^[A-Z0-9]{5}$/.test(id5)) { lookupErr.textContent = "請輸入身分證後 5 碼（5 位英數字）"; lookupErr.style.display = "block"; return; }
+
+    lookupSubmit.disabled = true;
+    lookupSubmit.textContent = "查詢中...";
+    try {
+      const url = `${window.CONFIG.API_URL}?action=lookup&name=${encodeURIComponent(name)}&id5=${encodeURIComponent(id5)}`;
+      const res = await fetch(url, { mode: "cors" });
+      const data = await res.json();
+
+      if (!data.ok) {
+        showLookupResult({
+          icon: "🔍",
+          title: "查無此筆報名資料",
+          msg: "請確認您輸入的姓名與身分證後 5 碼是否正確。\n\n如果還沒報名過，請點擊「立即報名」開始報名 😊\n\n如有疑問，請聯繫本中心：\n📞 復興教室　04-22249535\n📞 忠明教室　04-22608999\n📞 龍井教室　04-26336999",
+        });
+        return;
+      }
+      const tpl = STATUS_MESSAGES[data.status];
+      if (!tpl) {
+        showLookupResult({
+          icon: "❓",
+          title: "狀態未知：" + data.status,
+          msg: "請聯繫本中心查詢詳細狀態：\n📞 復興教室　04-22249535",
+        });
+        return;
+      }
+      showLookupResult(tpl, data);
+
+      // 已匯出 → 自動跳轉本中心系統並帶入姓名/身分證
+      if (data.status === "已匯出") {
+        const params = new URLSearchParams();
+        if (data.idCard) params.set("id", data.idCard);
+        if (data.name) params.set("name", data.name);
+        const targetUrl = "https://stusys-b.isha.org.tw/LA03.aspx" + (params.toString() ? "?" + params.toString() : "");
+        // 用 DOM API 建構（避免 innerHTML XSS）
+        const info = document.getElementById("lookup-result-info");
+        info.replaceChildren();
+        const link = document.createElement("a");
+        link.href = targetUrl;
+        link.target = "_blank";
+        link.rel = "noopener";
+        link.textContent = "前往本中心系統 →";
+        Object.assign(link.style, {
+          display: "inline-block", marginTop: "12px", background: "#0057B8",
+          color: "#fff", padding: "10px 20px", borderRadius: "6px",
+          textDecoration: "none", fontWeight: "600",
+        });
+        const note = document.createElement("div");
+        note.textContent = "3 秒後自動於新視窗開啟";
+        Object.assign(note.style, { marginTop: "8px", color: "#666", fontSize: "11.5px" });
+        info.append(link, note);
+        setTimeout(() => { window.open(targetUrl, "_blank", "noopener"); }, 3000);
+      }
+    } catch (e) {
+      lookupErr.textContent = "查詢失敗，請稍後再試（" + e.message + "）";
+      lookupErr.style.display = "block";
+    } finally {
+      lookupSubmit.disabled = false;
+      lookupSubmit.textContent = "查詢";
+    }
+  }
+
+  function showLookupResult(tpl, data) {
+    formArea.style.display = "none";
+    resultArea.style.display = "block";
+    lookupSubmit.style.display = "none";
+    lookupTitle.textContent = "查詢結果";
+    document.getElementById("lookup-result-icon").textContent = tpl.icon;
+    document.getElementById("lookup-result-title").textContent = tpl.title;
+    document.getElementById("lookup-result-msg").textContent = tpl.msg;
+    const info = document.getElementById("lookup-result-info");
+    info.replaceChildren();
+    if (data) {
+      info.textContent = `報名編號：${data.regId}　|　${data.courseLabel}`;
+    }
+  }
+
+  lookupSubmit.addEventListener("click", doLookup);
+  [lookupName, lookupId5].forEach(el => el.addEventListener("keydown", (e) => {
+    if (e.key === "Enter") doLookup();
+  }));
 </script>
 </body>
 </html>
