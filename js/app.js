@@ -372,6 +372,9 @@
           alert("以下尚未上傳：\n\n" + missing.map(g => `• ${g.qualLabel} — ${g.fileLabel}`).join("\n"));
           return;
         }
+        // 進入 Step 4：記錄起算時間，MIN_FILL_TIME_MS 由此起算（防 step1-3 慢慢填到 step4 一進來就送出被誤擋）
+        state.step4StartTime = Date.now();
+        State.save(state);
         go(4);
       });
     };
@@ -635,7 +638,9 @@
         const area = ZIP_TO_AREA[z];
         if (hintEl) hintEl.textContent = area || (z ? "查無此郵號" : "輸入 3 碼郵遞區號自動帶出縣市區");
         // 若地址為空或只含舊的縣市區前綴，則自動填縣市區
-        if (area && (!addrEl.value.trim() || /^[臺台][北中南市][縣市].{2,4}[區市鄉鎮]/.test(addrEl.value))) {
+        // 放寬：支援「臺/台 + 任 1–2 字 + 縣/市 + N 字 + 區/市/鄉/鎮」
+        // 涵蓋：臺北市、新北市、桃園市、新竹縣/市、苗栗縣、彰化縣、宜蘭縣、花蓮縣等所有縣市
+        if (area && (!addrEl.value.trim() || /^[一-龥]{2,4}[縣市][一-龥]{1,5}[區市鄉鎮]/.test(addrEl.value))) {
           // 如果地址空 → 填縣市區當前綴
           if (!addrEl.value.trim()) addrEl.value = area;
         }
@@ -744,6 +749,15 @@
     const form = document.getElementById("reg-form");
     const data = {};
     new FormData(form).forEach((v, k) => data[k] = v);
+    // ★ FormData 不會序列化 disabled 欄位 → 「聯絡地址同戶籍」勾選後 contact_zip/addr disabled 會空
+    // 修補：偵測勾選旗標，從戶籍欄位手動補入
+    const contactSameEl = document.getElementById("contact_same");
+    const isSame = contactSameEl && contactSameEl.checked;
+    if (isSame) {
+      data.contact_zip = data.contact_zip || data.reg_zip || "";
+      data.contact_addr = data.contact_addr || data.reg_addr || "";
+      data.contact_same = "on";
+    }
     state.form = data;
     State.save(state);
     return data;
@@ -765,7 +779,9 @@
     const f = collectForm();
     // 反機器人
     if (f.website) { alert("送出失敗"); return; }
-    const elapsed = Date.now() - state.startTime;
+    // 從「進入 step 4」的時間起算；若沒設則 fallback 到 startTime
+    const baseTime = state.step4StartTime || state.startTime;
+    const elapsed = Date.now() - baseTime;
     if (elapsed < CONFIG.MIN_FILL_TIME_MS) { alert("送出過快，請確認資料後再送出"); return; }
 
     document.querySelectorAll(".form-row.has-error").forEach(el => el.classList.remove("has-error"));

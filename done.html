@@ -85,7 +85,9 @@
       row.append(l, v);
       box.append(row);
     });
-    sessionStorage.removeItem("last_submission");
+    // 進到完成頁面立即清掉所有 sessionStorage（含主流程 state、暫存的身分證 base64 等）
+    // 公用電腦下個使用者開瀏覽器看不到任何個資
+    try { sessionStorage.clear(); } catch (e) {}
   })();
 </script>
 </body>
