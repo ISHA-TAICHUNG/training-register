@@ -785,8 +785,8 @@
     if (!f.education) errors.push(["education", "請選擇學歷"]);
     if (!Validate.zip(f.reg_zip)) errors.push(["reg_zip", "請填寫戶籍郵遞區號（3 碼）"]);
     if (!f.reg_addr || String(f.reg_addr).trim().length < 5) errors.push(["reg_addr", "請填寫完整戶籍地址"]);
-    if (!f.emergency_name) errors.push(["emergency_name", "請填寫緊急聯絡人"]);
-    if (!Validate.phone(f.emergency_phone)) errors.push(["emergency_phone", "緊急聯絡電話格式錯誤"]);
+    // 緊急聯絡人非必填，但若有填電話則格式要對
+    if (f.emergency_phone && !Validate.phone(f.emergency_phone)) errors.push(["emergency_phone", "緊急聯絡電話格式錯誤"]);
     if (f.company_tax && !Validate.taxId(f.company_tax)) errors.push(["company_tax", "統編需為 8 碼數字"]);
     return errors;
   }
