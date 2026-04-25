@@ -1,0 +1,44 @@
+{
+  "session_id": "",
+  "updated_at": "2026-04-25T01:12:54Z",
+  "review_mode": "single",
+  "has_code_change": true,
+  "has_doc_change": true,
+  "code_review": {
+    "executed": false,
+    "passed": false,
+    "last_run": ""
+  },
+  "doc_review": {
+    "executed": false,
+    "passed": false,
+    "last_run": ""
+  },
+  "precommit": {
+    "executed": false,
+    "passed": false,
+    "last_run": ""
+  },
+  "aggregate_gate": {
+    "executed": false,
+    "gate": null,
+    "source": null,
+    "reason": null,
+    "last_run": ""
+  },
+  "schema_version": 2,
+  "iteration_history": {
+    "current_round": 0,
+    "max_rounds": 10,
+    "findings_by_round": [],
+    "total_rounds_session": 0,
+    "strategic_reset_fired": false
+  },
+  "changed_files_since_review": [
+    "/Users/hao/Desktop/高風險專案/04_前台網站規劃/使用者回來後的步驟.md",
+    "/Users/hao/Desktop/高風險專案/04_前台網站規劃/承辦同仁操作SOP.md",
+    "/Users/hao/Desktop/高風險專案/04_前台網站規劃/資安檢查報告.md",
+    "/tmp/test_limit.py"
+  ],
+  "review_phase": "pending_review"
+}
