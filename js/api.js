@@ -73,7 +73,9 @@
     let res;
     try {
       // Apps Script 接受 text/plain 避免 CORS preflight
-      res = await fetch(url, {
+      // v27 修補：加 ?origin= query string 讓後端 ALLOWED_ORIGINS 白名單能實際生效
+      const postUrl = url + (url.includes("?") ? "&" : "?") + "origin=" + encodeURIComponent(location.origin);
+      res = await fetch(postUrl, {
         method: "POST",
         mode: "cors",
         headers: { "Content-Type": "text/plain;charset=utf-8" },
