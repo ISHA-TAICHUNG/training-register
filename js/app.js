@@ -556,15 +556,9 @@
               <label>公司地址</label>
               <input type="text" name="company_addr" placeholder="例：臺中市西區..." value="${escape(f.company_addr || '')}">
             </div>
-            <div class="form-2col">
-              <div class="form-row" data-field="company_contact">
-                <label>負責訓練聯絡人</label>
-                <input type="text" name="company_contact" placeholder="（公司內承接訓練事務之人員）" value="${escape(f.company_contact || '')}">
-              </div>
-              <div class="form-row" data-field="position">
-                <label>現任職務</label>
-                <input type="text" name="position" value="${escape(f.position || '')}">
-              </div>
+            <div class="form-row" data-field="company_contact">
+              <label>負責訓練聯絡人</label>
+              <input type="text" name="company_contact" placeholder="（公司內承接訓練事務之人員，與報名人非同一人時填寫）" value="${escape(f.company_contact || '')}">
             </div>
           </div>
 
