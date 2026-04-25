@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Allow: /index.html
+Disallow: /register.html
+Disallow: /done.html
+Disallow: /js/
+Disallow: /data/
+
+Sitemap: https://isha-taichung.github.io/training-register/sitemap.xml

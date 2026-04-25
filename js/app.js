@@ -40,9 +40,19 @@
 
   // 嘗試預取名額資訊（非阻塞，失敗不影響流程）
   let COURSES_STATUS = null;
+  let STATUS_FETCHED_AT = null;
   API.fetchCoursesStatus().then(s => {
     COURSES_STATUS = s;
+    STATUS_FETCHED_AT = new Date();
     if (state.step === 1 && window.__rerenderStep1) window.__rerenderStep1();
+    // 更新「名額更新於」時間戳
+    const tsEl = document.getElementById("status-timestamp");
+    if (tsEl && STATUS_FETCHED_AT) {
+      const t = STATUS_FETCHED_AT;
+      const hh = String(t.getHours()).padStart(2, "0");
+      const mm = String(t.getMinutes()).padStart(2, "0");
+      tsEl.textContent = `📅 名額更新於 ${hh}:${mm}（每 1 分鐘自動更新）`;
+    }
   });
 
   // 載入郵遞區號對照表（非阻塞）
@@ -156,6 +166,7 @@
             }).join("")}
           </div>
           <div id="course-list">${renderCourseList()}</div>
+          <div id="status-timestamp" style="text-align:right;font-size:12px;color:#666;margin-top:8px;padding-right:4px"></div>
         </div>
         <div class="btn-bar">
           <button class="btn btn-ghost" id="btn-home">返回首頁</button>
