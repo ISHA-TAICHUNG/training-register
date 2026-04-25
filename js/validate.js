@@ -18,10 +18,15 @@
     if (!/^[A-Z][12]\d{8}$/.test(s)) return false;
     const n = ID_LETTER_MAP[s[0]];
     if (n === undefined) return false;
-    const weights = [1, 9, 8, 7, 6, 5, 4, 3, 2, 1, 1];
-    let sum = Math.floor(n / 10) * weights[0] + (n % 10) * weights[1];
-    for (let i = 1; i <= 9; i++) sum += parseInt(s[i], 10) * weights[i];
-    sum += parseInt(s[9], 10);
+    // 標準演算法：
+    //   字母轉兩位數，十位 ×1、個位 ×9
+    //   接著 9 個數字（含第 10 碼檢查碼）權重 8,7,6,5,4,3,2,1,1
+    //   全部加總 % 10 應為 0
+    const weights = [8, 7, 6, 5, 4, 3, 2, 1, 1];
+    let sum = Math.floor(n / 10) * 1 + (n % 10) * 9;
+    for (let i = 0; i < 9; i++) {
+      sum += parseInt(s[i + 1], 10) * weights[i];
+    }
     return sum % 10 === 0;
   };
 

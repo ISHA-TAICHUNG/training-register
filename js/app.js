@@ -482,8 +482,8 @@
           </div>
           <div class="form-2col">
             <div class="form-row" data-field="education">
-              <label>學歷</label>
-              <select name="education">
+              <label>學歷 <span style="color:#c0392b">★</span></label>
+              <select name="education" required>
                 <option value="">請選擇</option>
                 ${EDUCATION_OPTIONS.map(v =>
                   `<option value="${escape(v)}" ${f.education === v ? 'selected' : ''}>${escape(v)}</option>`).join("")}
@@ -498,13 +498,13 @@
           <div class="form-group">
             <div class="form-group-title">二、戶籍地址</div>
             <div class="form-row" data-field="reg_zip">
-              <label>戶籍郵遞區號</label>
-              <input type="text" name="reg_zip" maxlength="3" placeholder="例：403" value="${escape(f.reg_zip || '')}">
+              <label>戶籍郵遞區號 <span style="color:#c0392b">★</span></label>
+              <input type="text" name="reg_zip" maxlength="3" placeholder="例：403" value="${escape(f.reg_zip || '')}" required>
               <div class="hint" id="reg_zip_hint" style="color:var(--brand)">${f.reg_zip && ZIP_TO_AREA[f.reg_zip] ? escape(ZIP_TO_AREA[f.reg_zip]) : '輸入 3 碼郵遞區號自動帶出縣市區'}</div>
             </div>
             <div class="form-row" data-field="reg_addr">
-              <label>戶籍地址</label>
-              <input type="text" name="reg_addr" placeholder="例：臺中市西區忠明南路..." value="${escape(f.reg_addr || '')}">
+              <label>戶籍地址 <span style="color:#c0392b">★</span></label>
+              <input type="text" name="reg_addr" placeholder="例:臺中市西區忠明南路..." value="${escape(f.reg_addr || '')}" required>
               <div class="hint">輸入縣市區後郵遞區號會自動填入</div>
             </div>
           </div>
@@ -782,6 +782,11 @@
     if (!Validate.idCard(f.id_card)) errors.push(["id_card", "身分證字號格式不正確"]);
     if (!Validate.phone(f.mobile)) errors.push(["mobile", "手機格式錯誤"]);
     if (f.email && !Validate.email(f.email)) errors.push(["email", "Email 格式錯誤"]);
+    if (!f.education) errors.push(["education", "請選擇學歷"]);
+    if (!Validate.zip(f.reg_zip)) errors.push(["reg_zip", "請填寫戶籍郵遞區號（3 碼）"]);
+    if (!f.reg_addr || String(f.reg_addr).trim().length < 5) errors.push(["reg_addr", "請填寫完整戶籍地址"]);
+    if (!f.emergency_name) errors.push(["emergency_name", "請填寫緊急聯絡人"]);
+    if (!Validate.phone(f.emergency_phone)) errors.push(["emergency_phone", "緊急聯絡電話格式錯誤"]);
     if (f.company_tax && !Validate.taxId(f.company_tax)) errors.push(["company_tax", "統編需為 8 碼數字"]);
     return errors;
   }
