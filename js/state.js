@@ -52,9 +52,12 @@
     }
   }
 
+  // ★ v27 修補：只清 KEY（主流程 state），不要清整個 sessionStorage
+  // 因為 app.js 在 State.clear() 之前才剛把 last_submission 寫入，
+  // 若清整個 storage 會把它一起清掉，done.html 就拿不到報名摘要。
+  // 完整 sessionStorage.clear() 改在 done.html 結尾執行（公用電腦保護）。
   function clear() {
     try { sessionStorage.removeItem(KEY); } catch (e) {}
-    try { sessionStorage.clear(); } catch (e) {}
   }
 
   window.State = { load, save, clear, defaultState };
