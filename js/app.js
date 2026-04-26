@@ -837,10 +837,13 @@
         consentAt: sessionStorage.getItem("consent_at") || null,  // 個資告知書同意時間
       };
       const res = await API.submitRegistration(payload);
+      // 帶身分證後 5 碼供 done.html 查詢預填（不存完整身分證避免外洩）
+      const idLast5 = String(f.id_card || "").slice(-5);
       sessionStorage.setItem("last_submission", JSON.stringify({
         regId: res.regId,
         course: state.course,
         name: f.name,
+        idLast5: idLast5,
       }));
       State.clear();
       location.href = "done.html";

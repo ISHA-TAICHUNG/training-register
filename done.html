@@ -47,8 +47,9 @@
     </div>
   </div>
 
-  <div class="btn-bar">
-    <button class="btn btn-primary" onclick="location.href='index.html'">返回首頁</button>
+  <div class="btn-bar" style="display:flex;gap:10px;flex-wrap:wrap">
+    <button class="btn" id="btn-lookup-status" style="flex:1;min-width:160px;background:#fff;color:#0057B8;border:2px solid #0057B8;padding:12px;border-radius:6px;font-family:inherit;font-size:15px;font-weight:600;cursor:pointer">📋 查詢報名狀態</button>
+    <button class="btn btn-primary" onclick="location.href='index.html'" style="flex:1;min-width:160px">返回首頁</button>
   </div>
 </main>
 
@@ -57,38 +58,50 @@
   <div class="ft-sub">OCCUPATIONAL SAFETY &amp; HEALTH · TAICHUNG</div>
 </footer>
 
+<script src="js/config.js"></script>
+<script src="js/lookup-modal.js"></script>
 <script>
+  // 把 last_submission 存的姓名 + 身分證後 5 碼留下來給查詢用（在 sessionStorage.clear 之前抓）
+  let lookupPrefill = null;
   (function () {
     const raw = sessionStorage.getItem("last_submission");
     const box = document.getElementById("summary");
     if (!raw) {
       box.textContent = "（無最近報名紀錄）";
-      return;
+    } else {
+      const s = JSON.parse(raw);
+      // 預填查詢資料：姓名 + 身分證後 5 碼（從 last_submission 取 — submit 時放進去的）
+      if (s.name && s.idLast5) {
+        lookupPrefill = { name: s.name, id5: s.idLast5 };
+      }
+      const rows = [
+        ["報名編號", s.regId || "審核後發送"],
+        ["課程名稱", s.course ? s.course.name + " " + s.course.session : ""],
+        ["上課日期", s.course ? s.course.date : ""],
+        ["上課地點", s.course ? s.course.location : ""],
+        ["報名人姓名", s.name || ""],
+      ];
+      rows.forEach(([label, val]) => {
+        const row = document.createElement("div");
+        row.className = "row";
+        const l = document.createElement("div");
+        l.className = "label";
+        l.textContent = label;
+        const v = document.createElement("div");
+        v.className = "val";
+        v.textContent = val;
+        row.append(l, v);
+        box.append(row);
+      });
     }
-    const s = JSON.parse(raw);
-    const rows = [
-      ["報名編號", s.regId || "審核後發送"],
-      ["課程名稱", s.course ? s.course.name + " " + s.course.session : ""],
-      ["上課日期", s.course ? s.course.date : ""],
-      ["上課地點", s.course ? s.course.location : ""],
-      ["報名人姓名", s.name || ""],
-    ];
-    rows.forEach(([label, val]) => {
-      const row = document.createElement("div");
-      row.className = "row";
-      const l = document.createElement("div");
-      l.className = "label";
-      l.textContent = label;
-      const v = document.createElement("div");
-      v.className = "val";
-      v.textContent = val;
-      row.append(l, v);
-      box.append(row);
-    });
-    // 進到完成頁面立即清掉所有 sessionStorage（含主流程 state、暫存的身分證 base64 等）
-    // 公用電腦下個使用者開瀏覽器看不到任何個資
+    // 進到完成頁面立即清掉所有 sessionStorage（公用電腦下個使用者看不到個資）
     try { sessionStorage.clear(); } catch (e) {}
   })();
+
+  // 查詢報名狀態按鈕（自動帶入剛報名的資料）
+  document.getElementById("btn-lookup-status").addEventListener("click", () => {
+    window.LookupModal.open(lookupPrefill);
+  });
 </script>
 </body>
 </html>
