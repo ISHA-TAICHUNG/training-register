@@ -41,6 +41,12 @@
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.11/dist/purify.min.js"
         integrity="sha384-Ic7KEGROu37YaruU6NyiYeib7UhjFyDZQ5fzBAji965L75T/4LGk5nzwMEjNGexs"
         crossorigin="anonymous"></script>
+<script>
+  // P1 deeplink 防護：直接打 register.html 沒勾同意書 → 強制回首頁
+  if (!sessionStorage.getItem('consent_at')) {
+    location.replace('index.html');
+  }
+</script>
 <script src="js/config.js"></script>
 <script src="js/state.js"></script>
 <script src="js/validate.js"></script>

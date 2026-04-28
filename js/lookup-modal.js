@@ -42,6 +42,7 @@
 
   let modal = null;
   let elements = {};
+  let exportTimerId = null;  // P1：「已匯出」的 setTimeout id，close() 要清掉避免關閉後仍跳轉
 
   // helper：建立元素 + 設定 style/attrs/textContent
   function el(tag, opts) {
@@ -150,6 +151,8 @@
   function open(prefill) {
     buildModal();
     modal.style.display = "flex";
+    // 鎖 body scroll（背景不會跟著動）
+    try { document.body.style.overflow = "hidden"; } catch (e) {}
     elements.form.style.display = "block";
     elements.result.style.display = "none";
     elements.error.style.display = "none";
@@ -161,7 +164,13 @@
     else elements.id5.focus();
   }
 
-  function close() { if (modal) modal.style.display = "none"; }
+  function close() {
+    if (modal) modal.style.display = "none";
+    // 清掉「已匯出」自動跳轉 timer，避免學員關閉後仍開新視窗
+    if (exportTimerId) { clearTimeout(exportTimerId); exportTimerId = null; }
+    // 還原 body scroll
+    try { document.body.style.overflow = ""; } catch (e) {}
+  }
 
   async function doLookup() {
     const name = elements.name.value.trim();
@@ -190,7 +199,6 @@
 
       if (data.status === "已匯出") {
         // ASP.NET LA03.aspx 接受 query string 自動填入：?SeaNAME=...&SeaID=...
-        // （驗證：對方頁面實際會把姓名與後 5 碼自動寫入 input value）
         const idLast5 = data.idCard ? String(data.idCard).slice(-5) : "";
         const fullName = data.name || "";
         const params = new URLSearchParams();
@@ -198,18 +206,18 @@
         if (idLast5) params.set("SeaID", idLast5);
         const targetUrl = "https://stusys-b.isha.org.tw/LA03.aspx" + (params.toString() ? "?" + params.toString() : "");
 
-        elements.info.replaceChildren();
+        // P1 修補：append 而非 replaceChildren，保留 showResult 寫入的 regId / courseLabel
+        // P1 修補：取消 setTimeout window.open（會被行動瀏覽器 popup-block 擋下），改用按鈕點擊（user gesture）
         const link = el("a", {
           attrs: { href: targetUrl, target: "_blank", rel: "noopener" },
-          style: { display: "inline-block", marginTop: "12px", background: "#0057B8", color: "#fff", padding: "10px 20px", borderRadius: "6px", textDecoration: "none", fontWeight: "600" },
-          text: "前往本中心系統 →",
+          style: { display: "inline-block", marginTop: "12px", background: "#0057B8", color: "#fff", padding: "12px 24px", borderRadius: "6px", textDecoration: "none", fontWeight: "600", fontSize: "14.5px" },
+          text: "🔗 點此前往本中心系統（自動帶入資料）",
         });
         const note = el("div", {
           style: { marginTop: "8px", color: "#666", fontSize: "11.5px" },
-          text: "3 秒後自動於新視窗開啟（已自動帶入您的姓名與後 5 碼）",
+          text: "點擊上方按鈕後，姓名與身分證後 5 碼會自動帶入查詢頁",
         });
-        elements.info.append(link, note);
-        setTimeout(() => { window.open(targetUrl, "_blank", "noopener"); }, 3000);
+        elements.info.append(document.createElement("br"), link, note);
       }
     } catch (e) {
       showError("查詢失敗，請稍後再試（" + e.message + "）");
