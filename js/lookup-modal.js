@@ -15,7 +15,7 @@
     "已匯出": {
       icon: "🎉",
       title: "您已成功登錄至本中心系統！",
-      msg: "太棒了！您的報名已完成所有審核流程，正在為您自動跳轉至本中心系統頁面...\n\n如未自動跳轉，請點下方按鈕。",
+      msg: "太棒了！您的報名已完成所有審核流程。\n\n請至本中心系統頁面，貼上下方資料完成查詢。",
     },
     "補件": {
       icon: "📝",
@@ -189,22 +189,76 @@
       showResult(tpl, data);
 
       if (data.status === "已匯出") {
-        const params = new URLSearchParams();
-        if (data.idCard) params.set("id", data.idCard);
-        if (data.name) params.set("name", data.name);
-        const targetUrl = "https://stusys-b.isha.org.tw/LA03.aspx" + (params.toString() ? "?" + params.toString() : "");
+        // 對方系統（LA03.aspx）不接受 query string 自動帶入，改用「顯示資料 + 一鍵複製」方案
+        const targetUrl = "https://stusys-b.isha.org.tw/LA03.aspx";
+        const idLast5 = data.idCard ? String(data.idCard).slice(-5) : "";
+        const fullName = data.name || "";
+
         elements.info.replaceChildren();
-        const link = el("a", {
+
+        // 資料卡片：顯示姓名 + 後 5 碼（學員可看可複製）
+        const dataCard = el("div", {
+          style: { background: "#FFF", border: "1px solid #0057B8", borderRadius: "8px", padding: "12px 16px", marginTop: "14px", textAlign: "left" },
+        });
+        const dataTitle = el("div", {
+          style: { fontSize: "12px", color: "#0057B8", fontWeight: "700", marginBottom: "8px" },
+          text: "📋 請複製以下資料貼至本中心系統",
+        });
+        const row1 = el("div", {
+          style: { fontSize: "14px", marginBottom: "4px" },
+          children: [
+            el("span", { style: { color: "#666", marginRight: "8px" }, text: "姓名：" }),
+            el("strong", { style: { color: "#1a1a1a" }, text: fullName }),
+          ],
+        });
+        const row2 = el("div", {
+          style: { fontSize: "14px" },
+          children: [
+            el("span", { style: { color: "#666", marginRight: "8px" }, text: "身分證後 5 碼：" }),
+            el("strong", { style: { color: "#1a1a1a", fontFamily: "monospace", letterSpacing: "2px" }, text: idLast5 }),
+          ],
+        });
+        dataCard.append(dataTitle, row1, row2);
+
+        // 一鍵複製 + 前往按鈕
+        const btnRow = el("div", {
+          style: { display: "flex", gap: "8px", marginTop: "12px" },
+        });
+        const copyBtn = el("button", {
+          style: { flex: "1", padding: "10px", border: "1px solid #0057B8", background: "#fff", color: "#0057B8", borderRadius: "6px", fontFamily: "inherit", fontSize: "13px", fontWeight: "600", cursor: "pointer" },
+          text: "📋 複製姓名",
+        });
+        copyBtn.addEventListener("click", async () => {
+          try {
+            await navigator.clipboard.writeText(fullName);
+            copyBtn.textContent = "✅ 已複製姓名";
+            setTimeout(() => { copyBtn.textContent = "📋 複製姓名"; }, 2000);
+          } catch (e) {
+            copyBtn.textContent = "❌ 複製失敗，請手動選取";
+          }
+        });
+        const copyIdBtn = el("button", {
+          style: { flex: "1", padding: "10px", border: "1px solid #0057B8", background: "#fff", color: "#0057B8", borderRadius: "6px", fontFamily: "inherit", fontSize: "13px", fontWeight: "600", cursor: "pointer" },
+          text: "📋 複製後 5 碼",
+        });
+        copyIdBtn.addEventListener("click", async () => {
+          try {
+            await navigator.clipboard.writeText(idLast5);
+            copyIdBtn.textContent = "✅ 已複製後 5 碼";
+            setTimeout(() => { copyIdBtn.textContent = "📋 複製後 5 碼"; }, 2000);
+          } catch (e) {
+            copyIdBtn.textContent = "❌ 複製失敗";
+          }
+        });
+        btnRow.append(copyBtn, copyIdBtn);
+
+        const goLink = el("a", {
           attrs: { href: targetUrl, target: "_blank", rel: "noopener" },
-          style: { display: "inline-block", marginTop: "12px", background: "#0057B8", color: "#fff", padding: "10px 20px", borderRadius: "6px", textDecoration: "none", fontWeight: "600" },
+          style: { display: "block", marginTop: "12px", background: "#0057B8", color: "#fff", padding: "12px 20px", borderRadius: "6px", textDecoration: "none", fontWeight: "600", textAlign: "center" },
           text: "前往本中心系統 →",
         });
-        const note = el("div", {
-          style: { marginTop: "8px", color: "#666", fontSize: "11.5px" },
-          text: "3 秒後自動於新視窗開啟",
-        });
-        elements.info.append(link, note);
-        setTimeout(() => { window.open(targetUrl, "_blank", "noopener"); }, 3000);
+
+        elements.info.append(dataCard, btnRow, goLink);
       }
     } catch (e) {
       showError("查詢失敗，請稍後再試（" + e.message + "）");
