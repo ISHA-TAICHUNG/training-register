@@ -197,11 +197,6 @@
 
   // ===== 報名狀態查詢（共用模組） =====
   document.getElementById("btn-lookup").addEventListener("click", () => window.LookupModal.open());
-
-  lookupSubmit.addEventListener("click", doLookup);
-  [lookupName, lookupId5].forEach(el => el.addEventListener("keydown", (e) => {
-    if (e.key === "Enter") doLookup();
-  }));
 </script>
 </body>
 </html>

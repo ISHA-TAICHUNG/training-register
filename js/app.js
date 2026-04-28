@@ -13,8 +13,11 @@
   let QUALS = null;
 
   // --- 安全渲染輔助 ---
+  // SANITIZE_DOM: false 是必要的 — DOMPurify 預設 DOM Clobbering 防護會剔除
+  // input name="name" / name="id" 等保留字屬性，導致 FormData 收不到值。
+  // 我們的 html 全是程式碼寫死 + escape() 處理 user value，無 DOM clobbering 風險。
   function purify(html) {
-    if (window.DOMPurify) return window.DOMPurify.sanitize(html);
+    if (window.DOMPurify) return window.DOMPurify.sanitize(html, { SANITIZE_DOM: false });
     return html; // fallback：escape() 已處理使用者資料
   }
   function renderHTML(el, html) {
