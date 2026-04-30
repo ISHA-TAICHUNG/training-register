@@ -148,6 +148,7 @@
               <span>📍 ${escape(c.location)}</span>
               <span>📅 ${escape(c.date)}</span>
               ${c.practicum ? `<span>🔧 ${escape(c.practicum)}</span>` : ""}
+              ${c.hours ? `<span>⏱ ${escape(String(c.hours))} 小時</span>` : ""}
               ${seatBadge}
             </div>
           </div>`;
@@ -236,7 +237,7 @@
 
           <div class="notice notice-info">
             <strong>已選課程：</strong>${escape(state.course.name)} ${escape(state.course.session)}
-            <br><strong>日期：</strong>${escape(state.course.date)}　<strong>地點：</strong>${escape(state.course.location)}
+            <br><strong>日期：</strong>${escape(state.course.date)}　<strong>地點：</strong>${escape(state.course.location)}${state.course.hours ? `　<strong>時數：</strong>${escape(String(state.course.hours))} 小時` : ""}
           </div>
 
           <div class="form-group-title" style="margin-top:16px">一、基本資格（請選擇你的身份，至少 1 項）<span class="req">★</span></div>
