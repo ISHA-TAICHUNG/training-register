@@ -23,7 +23,7 @@
       "id": "aborigine",
       "label": "原住民",
       "required_files": [
-        { "id": "id_proof", "label": "身分證明文件" }
+        { "id": "id_proof", "label": "註記有「原住民身分」及「族別」的戶口名簿或戶籍謄本" }
       ],
       "description": "設籍於臺灣之原住民"
     },
