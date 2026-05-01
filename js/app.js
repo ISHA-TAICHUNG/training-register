@@ -872,6 +872,23 @@
     return (n / 1024 / 1024).toFixed(1) + " MB";
   }
 
-  const startStep = Math.max(1, state.step || 1);
+  // 招生簡章 deep-link：?course=T23 預選課程後跳 Step 2（勾選資格）
+  let startStep = Math.max(1, state.step || 1);
+  try {
+    const urlCourseId = new URLSearchParams(location.search).get("course");
+    if (urlCourseId) {
+      const all = [...COURSES.training, ...COURSES.seminars];
+      const found = all.find(c => c.id === urlCourseId);
+      if (found) {
+        state.course = found;
+        State.save(state);
+        if (startStep < 2) startStep = 2;
+        // 清掉網址列的 ?course= 參數避免重整時重複處理
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState({}, "", location.pathname);
+        }
+      }
+    }
+  } catch (e) { /* 無 URLSearchParams 支援的舊瀏覽器 fallback：忽略 */ }
   go(startStep);
 })();

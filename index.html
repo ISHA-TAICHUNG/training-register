@@ -194,14 +194,24 @@
   const agreeBtn = document.getElementById("consent-agree");
   const cancelBtn = document.getElementById("consent-cancel");
 
-  startBtn.addEventListener("click", () => {
+  function openConsent() {
     modal.style.display = "flex";
     checkbox.checked = false;
     agreeBtn.disabled = true;
     agreeBtn.style.opacity = "0.5";
     // P1：鎖背景 scroll，避免 modal 開啟時背景跟著滾
     try { document.body.style.overflow = "hidden"; } catch (e) {}
-  });
+  }
+  startBtn.addEventListener("click", openConsent);
+
+  // 招生簡章 deep-link (?course=T23) → 進站直接彈同意書，省一次點擊
+  try {
+    const initCourseId = new URLSearchParams(location.search).get("course");
+    if (initCourseId && /^[TS]\d{1,3}$/.test(initCourseId)) {
+      // 等 0.3s 讓畫面渲染穩定再彈
+      setTimeout(openConsent, 300);
+    }
+  } catch (e) { /* 舊瀏覽器 fallback */ }
   checkbox.addEventListener("change", () => {
     agreeBtn.disabled = !checkbox.checked;
     agreeBtn.style.opacity = checkbox.checked ? "1" : "0.5";
@@ -214,7 +224,14 @@
   agreeBtn.addEventListener("click", () => {
     // 紀錄同意時間（送出時隨 payload 一起傳給後端）
     sessionStorage.setItem("consent_at", new Date().toISOString());
-    location.href = "register.html";
+    // 招生簡章 deep-link：保留 ?course= 參數一併帶到 register.html
+    const params = new URLSearchParams(location.search);
+    const courseId = params.get("course");
+    if (courseId && /^[TS]\d{1,3}$/.test(courseId)) {
+      location.href = "register.html?course=" + encodeURIComponent(courseId);
+    } else {
+      location.href = "register.html";
+    }
   });
   // 點擊背景關閉
   modal.addEventListener("click", (e) => {
