@@ -241,7 +241,47 @@
     elements.rtitle.textContent = tpl.title;
     elements.msg.textContent = tpl.msg;
     elements.info.replaceChildren();
-    if (data) {
+    if (!data) return;
+
+    // v34 修：支援多筆報名（同一身分證可報多堂課）
+    const regs = Array.isArray(data.registrations) ? data.registrations : null;
+    if (regs && regs.length > 1) {
+      // 多筆 → 顯示列表
+      const header = el("div", {
+        style: { fontWeight: "700", color: "#0057B8", marginBottom: "10px", fontSize: "14px" },
+        text: `您共報名 ${regs.length} 門課程：`,
+      });
+      const list = el("div", { style: { display: "flex", flexDirection: "column", gap: "8px" } });
+      regs.forEach((r, idx) => {
+        const statusIcon = STATUS_MESSAGES[r.status]?.icon || "📋";
+        const statusColor = (r.status === "通過" || r.status === "已匯出") ? "#1e8e3e"
+                          : (r.status === "拒絕" || r.status === "取消") ? "#c5221f"
+                          : (r.status === "補件") ? "#e8710a"
+                          : "#5f6368";
+        const card = el("div", {
+          style: { border: "1px solid #DDE4EE", borderRadius: "6px", padding: "10px 12px", background: "#fff", textAlign: "left" },
+          children: [
+            el("div", {
+              style: { fontSize: "12px", color: "#666", marginBottom: "4px" },
+              text: `${idx + 1}. ${r.courseLabel}`,
+            }),
+            el("div", {
+              style: { display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "12px" },
+              children: [
+                el("span", { style: { color: "#888" }, text: `編號 ${r.regId}` }),
+                el("span", {
+                  style: { color: statusColor, fontWeight: "700" },
+                  text: `${statusIcon} ${r.status}`,
+                }),
+              ],
+            }),
+          ],
+        });
+        list.append(card);
+      });
+      elements.info.append(header, list);
+    } else {
+      // 單筆 → 維持原 UI
       elements.info.textContent = `報名編號：${data.regId}　|　${data.courseLabel}`;
     }
   }
