@@ -190,7 +190,13 @@
         showResult(NOT_FOUND);
         return;
       }
-      const tpl = STATUS_MESSAGES[data.status];
+      // v34 修：多筆報名時依「組合狀況」顯示綜合訊息
+      let tpl;
+      if (Array.isArray(data.registrations) && data.registrations.length > 1) {
+        tpl = buildMultiStatusTpl(data.registrations);
+      } else {
+        tpl = STATUS_MESSAGES[data.status];
+      }
       if (!tpl) {
         showResult({ icon: "❓", title: "狀態未知：" + data.status, msg: "請聯繫本中心查詢詳細狀態：\n📞 復興教室　04-22249535" });
         return;
@@ -230,6 +236,51 @@
   function showError(msg) {
     elements.error.textContent = msg;
     elements.error.style.display = "block";
+  }
+
+  // v34: 多筆報名 → 依組合狀況產生綜合訊息
+  function buildMultiStatusTpl(regs) {
+    const counts = {};
+    regs.forEach(r => { counts[r.status] = (counts[r.status] || 0) + 1; });
+    const total = regs.length;
+    const positive = (counts["已匯出"] || 0) + (counts["通過"] || 0);
+    const pending = (counts["待審"] || 0) + (counts["補件"] || 0);
+    const negative = (counts["拒絕"] || 0) + (counts["取消"] || 0);
+
+    // 全部正面結果（已匯出 / 通過）
+    if (positive === total) {
+      return {
+        icon: "🎉",
+        title: `恭喜！您 ${total} 門課程全部通過審查`,
+        msg: "詳細資訊請參考下方各課程編號。如有問題請聯繫本中心：\n📞 復興教室　04-22249535",
+      };
+    }
+    // 全部審查中
+    if (pending === total) {
+      return {
+        icon: "⏳",
+        title: `我們收到您 ${total} 筆報名！`,
+        msg: "您的資料正在審查中，承辦人員會仔細確認您的證明文件。\n請耐心等候 🙏",
+      };
+    }
+    // 全部負面（拒絕 / 取消）
+    if (negative === total) {
+      return {
+        icon: "💌",
+        title: `您 ${total} 筆報名均已${counts["拒絕"] ? "未通過" : "取消"}`,
+        msg: "如有疑問請洽本中心：\n📞 復興教室　04-22249535",
+      };
+    }
+    // 混合狀態 → 各狀態筆數摘要
+    const parts = [];
+    if (positive) parts.push(`${positive} 筆已通過/匯出`);
+    if (pending) parts.push(`${pending} 筆審查中`);
+    if (negative) parts.push(`${negative} 筆未通過/已取消`);
+    return {
+      icon: "📋",
+      title: `您共有 ${total} 筆報名`,
+      msg: `狀態：${parts.join("、")}\n各筆詳情請見下方列表。如有問題請洽：\n📞 復興教室　04-22249535`,
+    };
   }
 
   function showResult(tpl, data) {
