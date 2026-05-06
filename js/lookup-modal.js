@@ -20,25 +20,30 @@
     "補件": {
       icon: "📝",
       title: "您的資料需要補件",
-      msg: "我們在審查您的資料時發現需要您補充一些文件。\n\n請主動與本中心聯繫，我們會協助您完成補件。\n\n📞 復興教室　04-22249535\n📞 忠明教室　04-22608999\n📞 龍井教室　04-26336999",
+      msg: "我們在審查您的資料時發現需要您補充一些文件。\n\n請主動與本中心聯繫，我們會協助您完成補件。\n\n" + getContactLines(),
     },
     "拒絕": {
       icon: "💌",
       title: "很抱歉，您資格不符",
-      msg: "如有問題請洽本中心：\n\n📞 復興教室　04-22249535\n📞 忠明教室　04-22608999\n📞 龍井教室　04-26336999",
+      msg: "如有問題請洽本中心：\n\n" + getContactLines(),
     },
     "取消": {
       icon: "ℹ️",
       title: "您的報名已取消",
-      msg: "您的這次報名已被取消。\n\n如非您本人申請取消，或有任何疑問，請儘速與本中心聯繫確認。\n\n📞 復興教室　04-22249535\n📞 忠明教室　04-22608999\n📞 龍井教室　04-26336999",
+      msg: "您的這次報名已被取消。\n\n如非您本人申請取消，或有任何疑問，請儘速與本中心聯繫確認。\n\n" + getContactLines(),
     },
   };
 
   const NOT_FOUND = {
     icon: "🔍",
     title: "查無此筆報名資料",
-    msg: "請確認您輸入的姓名與身分證後 5 碼是否正確。\n\n如果還沒報名過，請點擊「立即報名」開始報名 😊\n\n如有疑問，請聯繫本中心：\n📞 復興教室　04-22249535\n📞 忠明教室　04-22608999\n📞 龍井教室　04-26336999",
+    msg: "請確認您輸入的姓名與身分證後 5 碼是否正確。\n\n如果還沒報名過，請點擊「立即報名」開始報名 😊\n\n如有疑問，請聯繫本中心：\n" + getContactLines(),
   };
+
+  // 三教室電話統一格式（單筆 / 多筆訊息共用，避免不一致）
+  function getContactLines() {
+    return "📞 復興教室　04-22249535\n📞 忠明教室　04-22608999\n📞 龍井教室　04-26336999";
+  }
 
   let modal = null;
   let elements = {};
@@ -191,14 +196,18 @@
         return;
       }
       // v34 修：多筆報名時依「組合狀況」顯示綜合訊息
+      // 單筆但仍帶 registrations 也走多筆 path（向前防呆）
       let tpl;
-      if (Array.isArray(data.registrations) && data.registrations.length > 1) {
-        tpl = buildMultiStatusTpl(data.registrations);
+      const regs = Array.isArray(data.registrations) ? data.registrations : null;
+      if (regs && regs.length > 1) {
+        tpl = buildMultiStatusTpl(regs);
+      } else if (regs && regs.length === 1) {
+        tpl = STATUS_MESSAGES[regs[0].status] || STATUS_MESSAGES[data.status];
       } else {
         tpl = STATUS_MESSAGES[data.status];
       }
       if (!tpl) {
-        showResult({ icon: "❓", title: "狀態未知：" + data.status, msg: "請聯繫本中心查詢詳細狀態：\n📞 復興教室　04-22249535" });
+        showResult({ icon: "❓", title: "狀態未知：" + data.status, msg: "請聯繫本中心查詢詳細狀態：\n" + getContactLines() });
         return;
       }
       showResult(tpl, data);
@@ -246,13 +255,14 @@
     const positive = (counts["已匯出"] || 0) + (counts["通過"] || 0);
     const pending = (counts["待審"] || 0) + (counts["補件"] || 0);
     const negative = (counts["拒絕"] || 0) + (counts["取消"] || 0);
+    const unknown = total - positive - pending - negative;   // P2 修：未知狀態不漏算
 
     // 全部正面結果（已匯出 / 通過）
     if (positive === total) {
       return {
         icon: "🎉",
         title: `恭喜！您 ${total} 門課程全部通過審查`,
-        msg: "詳細資訊請參考下方各課程編號。如有問題請聯繫本中心：\n📞 復興教室　04-22249535",
+        msg: "詳細資訊請參考下方各課程編號。如有問題請聯繫本中心：\n" + getContactLines(),
       };
     }
     // 全部審查中
@@ -265,21 +275,28 @@
     }
     // 全部負面（拒絕 / 取消）
     if (negative === total) {
+      const rejectN = counts["拒絕"] || 0;
+      const cancelN = counts["取消"] || 0;
+      let title;
+      if (rejectN > 0 && cancelN > 0) title = `您 ${total} 筆報名：${rejectN} 筆未通過、${cancelN} 筆已取消`;
+      else if (rejectN > 0) title = `您 ${total} 筆報名均未通過`;
+      else title = `您 ${total} 筆報名均已取消`;
       return {
         icon: "💌",
-        title: `您 ${total} 筆報名均已${counts["拒絕"] ? "未通過" : "取消"}`,
-        msg: "如有疑問請洽本中心：\n📞 復興教室　04-22249535",
+        title,
+        msg: "如有疑問請洽本中心：\n" + getContactLines(),
       };
     }
-    // 混合狀態 → 各狀態筆數摘要
+    // 混合狀態 → 各狀態筆數摘要（含未知狀態）
     const parts = [];
     if (positive) parts.push(`${positive} 筆已通過/匯出`);
     if (pending) parts.push(`${pending} 筆審查中`);
     if (negative) parts.push(`${negative} 筆未通過/已取消`);
+    if (unknown) parts.push(`${unknown} 筆其他狀態`);   // P2 修
     return {
       icon: "📋",
       title: `您共有 ${total} 筆報名`,
-      msg: `狀態：${parts.join("、")}\n各筆詳情請見下方列表。如有問題請洽：\n📞 復興教室　04-22249535`,
+      msg: `狀態：${parts.join("、")}\n各筆詳情請見下方列表。如有問題請洽：\n${getContactLines()}`,
     };
   }
 
@@ -304,6 +321,7 @@
       });
       const list = el("div", { style: { display: "flex", flexDirection: "column", gap: "8px" } });
       regs.forEach((r, idx) => {
+        const statusText = r.status || "未知狀態";   // Nit 修
         const statusIcon = STATUS_MESSAGES[r.status]?.icon || "📋";
         const statusColor = (r.status === "通過" || r.status === "已匯出") ? "#1e8e3e"
                           : (r.status === "拒絕" || r.status === "取消") ? "#c5221f"
@@ -314,15 +332,15 @@
           children: [
             el("div", {
               style: { fontSize: "12px", color: "#666", marginBottom: "4px" },
-              text: `${idx + 1}. ${r.courseLabel}`,
+              text: `${idx + 1}. ${r.courseLabel || "（課程名稱缺漏）"}`,
             }),
             el("div", {
               style: { display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: "12px" },
               children: [
-                el("span", { style: { color: "#888" }, text: `編號 ${r.regId}` }),
+                el("span", { style: { color: "#888" }, text: `編號 ${r.regId || "（編號缺漏）"}` }),
                 el("span", {
                   style: { color: statusColor, fontWeight: "700" },
-                  text: `${statusIcon} ${r.status}`,
+                  text: `${statusIcon} ${statusText}`,
                 }),
               ],
             }),
@@ -332,8 +350,11 @@
       });
       elements.info.append(header, list);
     } else {
-      // 單筆 → 維持原 UI
-      elements.info.textContent = `報名編號：${data.regId}　|　${data.courseLabel}`;
+      // 單筆 → 維持原 UI（regs[0] 優先 fallback 到頂層欄位）
+      const r0 = (regs && regs[0]) || {};
+      const regId = r0.regId || data.regId || "（編號缺漏）";
+      const courseLabel = r0.courseLabel || data.courseLabel || "（課程缺漏）";
+      elements.info.textContent = `報名編號：${regId}　|　${courseLabel}`;
     }
   }
 
