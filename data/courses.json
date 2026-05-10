@@ -697,7 +697,8 @@
       "date": "07/30上午",
       "date_short": "07/30",
       "practicum": "",
-      "hours": 3
+      "hours": 3,
+      "applicable": "職業安全衛生業務主管（甲、乙、丙、丁種）"
     },
     {
       "id": "S02",
@@ -714,7 +715,8 @@
       "date": "07/30下午",
       "date_short": "07/30",
       "practicum": "",
-      "hours": 3
+      "hours": 3,
+      "applicable": "職業安全衛生業務主管（甲、乙、丙、丁種）"
     },
     {
       "id": "S03",
@@ -731,7 +733,8 @@
       "date": "08/20上午",
       "date_short": "08/20",
       "practicum": "",
-      "hours": 3
+      "hours": 3,
+      "applicable": "職業安全衛生業務主管（甲、乙、丙、丁種）"
     },
     {
       "id": "S04",
@@ -748,7 +751,8 @@
       "date": "08/20下午",
       "date_short": "08/20",
       "practicum": "",
-      "hours": 3
+      "hours": 3,
+      "applicable": "職業安全衛生業務主管（甲、乙、丙、丁種）"
     },
     {
       "id": "S05",
@@ -765,7 +769,8 @@
       "date": "09/29上午",
       "date_short": "09/29",
       "practicum": "",
-      "hours": 3
+      "hours": 3,
+      "applicable": "有害作業主管（有機、粉塵）"
     },
     {
       "id": "S06",
@@ -782,7 +787,8 @@
       "date": "09/29下午",
       "date_short": "09/29",
       "practicum": "",
-      "hours": 3
+      "hours": 3,
+      "applicable": "有害作業主管（有機、粉塵）"
     },
     {
       "id": "S07",
@@ -799,7 +805,8 @@
       "date": "06/26上午",
       "date_short": "06/26",
       "practicum": "",
-      "hours": 3
+      "hours": 3,
+      "applicable": "有害作業主管（有機、粉塵）"
     },
     {
       "id": "S08",
@@ -816,7 +823,8 @@
       "date": "06/26下午",
       "date_short": "06/26",
       "practicum": "",
-      "hours": 3
+      "hours": 3,
+      "applicable": "有害作業主管（有機、粉塵）"
     },
     {
       "id": "S09",
@@ -833,7 +841,8 @@
       "date": "09/30上午",
       "date_short": "09/30",
       "practicum": "",
-      "hours": 3
+      "hours": 3,
+      "applicable": "營造作業主管（屋頂、施工架、鋼構組配）"
     },
     {
       "id": "S10",
@@ -850,7 +859,8 @@
       "date": "09/30下午",
       "date_short": "09/30",
       "practicum": "",
-      "hours": 3
+      "hours": 3,
+      "applicable": "營造作業主管（屋頂、施工架、鋼構組配）"
     },
     {
       "id": "S11",
@@ -867,7 +877,8 @@
       "date": "07/03上午",
       "date_short": "07/03",
       "practicum": "",
-      "hours": 3
+      "hours": 3,
+      "applicable": "起重機及吊掛操作人員（固定式、移動式及吊掛指揮手）"
     },
     {
       "id": "S12",
@@ -884,7 +895,8 @@
       "date": "06/18下午",
       "date_short": "06/18",
       "practicum": "",
-      "hours": 3
+      "hours": 3,
+      "applicable": "起重機及吊掛操作人員（固定式、移動式及吊掛指揮手）"
     },
     {
       "id": "S13",
@@ -901,7 +913,8 @@
       "date": "06/23下午",
       "date_short": "06/23",
       "practicum": "",
-      "hours": 3
+      "hours": 3,
+      "applicable": "高壓氣體操作人員（容器、特定設備）"
     },
     {
       "id": "S14",
@@ -918,7 +931,8 @@
       "date": "08/29下午-假日",
       "date_short": "08/29",
       "practicum": "",
-      "hours": 3
+      "hours": 3,
+      "applicable": "高壓氣體操作人員（容器、特定設備）"
     },
     {
       "id": "S15",
@@ -935,7 +949,8 @@
       "date": "06/25下午",
       "date_short": "06/25",
       "practicum": "",
-      "hours": 3
+      "hours": 3,
+      "applicable": "高空作業車操作人員"
     },
     {
       "id": "S16",
@@ -952,7 +967,8 @@
       "date": "07/03下午",
       "date_short": "07/03",
       "practicum": "",
-      "hours": 3
+      "hours": 3,
+      "applicable": "堆高機操作人員"
     },
     {
       "id": "S17",
@@ -969,7 +985,8 @@
       "date": "08/14夜間",
       "date_short": "08/14",
       "practicum": "",
-      "hours": 3
+      "hours": 3,
+      "applicable": "起重機及吊掛操作人員（固定式、移動式及吊掛指揮手）"
     },
     {
       "id": "S18",
@@ -986,7 +1003,8 @@
       "date": "09/04下午",
       "date_short": "09/04",
       "practicum": "",
-      "hours": 3
+      "hours": 3,
+      "applicable": "急救人員"
     },
     {
       "id": "S19",
@@ -1003,7 +1021,8 @@
       "date": "09/29早上",
       "date_short": "09/29",
       "practicum": "",
-      "hours": 3
+      "hours": 3,
+      "applicable": "一般安全衛生教育訓練（營造業、臺灣職安卡）"
     },
     {
       "id": "S20",
@@ -1020,7 +1039,8 @@
       "date": "09/21上午",
       "date_short": "09/21",
       "practicum": "",
-      "hours": 3
+      "hours": 3,
+      "applicable": "起重機及吊掛操作人員（固定式、移動式及吊掛指揮手）"
     }
   ],
   "updated": "2026-04-24",

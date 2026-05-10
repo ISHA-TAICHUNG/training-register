@@ -151,6 +151,7 @@
               ${c.hours ? `<span>⏱ ${escape(String(c.hours))} 小時</span>` : ""}
               ${seatBadge}
             </div>
+            ${c.applicable ? `<div class="course-applicable" style="font-size:11.5px;color:#888;margin-top:6px;line-height:1.5">適用：${escape(c.applicable)}</div>` : ""}
           </div>`;
       }).join("");
     };
