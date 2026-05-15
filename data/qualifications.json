@@ -23,7 +23,6 @@
           "id": "service",
           "label": "服務證明（在職證明書）",
           "template_url": "assets/templates/在職證明書範例.docx",
-          "template_pdf": "assets/templates/在職證明書範例.pdf",
           "template_hint": "如無公司既有格式，可下載此範例填寫"
         }
       ],

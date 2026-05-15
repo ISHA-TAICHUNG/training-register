@@ -331,10 +331,7 @@
                 ${g.templateUrl ? `
                 <div class="upload-group-template" style="background:#e0f2fe;border:1px solid #93c5fd;border-radius:6px;padding:10px 12px;margin:8px 0;font-size:13px;line-height:1.6">
                   <div style="color:#075985;font-weight:600;margin-bottom:4px">📄 ${escape(g.templateHint || '可下載範例填寫')}</div>
-                  <div style="display:flex;gap:10px;flex-wrap:wrap">
-                    <a href="${escape(g.templateUrl)}" download style="color:#0057B8;text-decoration:none;font-weight:600">⬇️ Word 版（可編輯）</a>
-                    ${g.templatePdf ? `<a href="${escape(g.templatePdf)}" target="_blank" rel="noopener" style="color:#0057B8;text-decoration:none;font-weight:600">⬇️ PDF 版（可列印手寫）</a>` : ''}
-                  </div>
+                  <a href="${escape(g.templateUrl)}" download style="color:#0057B8;text-decoration:none;font-weight:600">⬇️ 下載 Word 範例</a>
                 </div>` : ''}
 
                 <div class="file-list">
