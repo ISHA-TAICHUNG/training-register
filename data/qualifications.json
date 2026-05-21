@@ -21,9 +21,9 @@
       "required_files": [
         {
           "id": "service",
-          "label": "服務證明（在職證明書）",
+          "label": "服務證明（限用本中心制式在職證明書）",
           "template_url": "assets/templates/在職證明書範例.docx",
-          "template_hint": "如無公司既有格式，可下載此範例填寫"
+          "template_hint": "⚠️ 限用本中心制式格式（公司既有版本不受理）"
         }
       ],
       "description": "於臺中市境內事業單位工作之勞工"
