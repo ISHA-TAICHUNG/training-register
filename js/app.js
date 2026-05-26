@@ -462,12 +462,12 @@
             <div class="form-row" data-field="gender">
               <label>性別 <span class="req">★</span></label>
               <div class="radio-group" style="display:flex;gap:10px;margin-top:4px">
-                <label class="radio-btn" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:11px 12px;border:1.5px solid var(--line);border-radius:var(--radius-sm);background:white;cursor:pointer;font-size:15px;user-select:none">
-                  <input type="radio" name="gender" value="男" ${f.gender === '男' ? 'checked' : ''} required style="width:18px;height:18px;cursor:pointer">
+                <label class="radio-btn radio-btn--lg" style="flex:1">
+                  <input type="radio" name="gender" value="男" ${f.gender === '男' ? 'checked' : ''} required>
                   <span>男</span>
                 </label>
-                <label class="radio-btn" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:11px 12px;border:1.5px solid var(--line);border-radius:var(--radius-sm);background:white;cursor:pointer;font-size:15px;user-select:none">
-                  <input type="radio" name="gender" value="女" ${f.gender === '女' ? 'checked' : ''} required style="width:18px;height:18px;cursor:pointer">
+                <label class="radio-btn radio-btn--lg" style="flex:1">
+                  <input type="radio" name="gender" value="女" ${f.gender === '女' ? 'checked' : ''} required>
                   <span>女</span>
                 </label>
               </div>
@@ -504,8 +504,8 @@
               <label>學歷 <span class="req">★</span></label>
               <div class="radio-group" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-top:4px">
                 ${EDUCATION_OPTIONS.map((v, i) => `
-                <label class="radio-btn" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 8px;border:1.5px solid var(--line);border-radius:var(--radius-sm);background:white;cursor:pointer;font-size:14px;user-select:none;white-space:nowrap">
-                  <input type="radio" name="education" value="${escape(v)}" ${f.education === v ? 'checked' : ''}${i === 0 ? ' required' : ''} style="width:16px;height:16px;cursor:pointer;flex-shrink:0">
+                <label class="radio-btn">
+                  <input type="radio" name="education" value="${escape(v)}" ${f.education === v ? 'checked' : ''}${i === 0 ? ' required' : ''}>
                   <span>${escape(v)}</span>
                 </label>`).join("")}
               </div>

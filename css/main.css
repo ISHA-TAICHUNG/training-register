@@ -806,7 +806,31 @@ main {
 .form-row.has-error select { border-color: var(--danger); }
 .form-row.has-error .err { display: block; }
 
-/* Radio button group (e.g. 性別) — LINE webview 友善（避開 native select dropdown 失靈問題） */
+/* Radio button group (e.g. 性別 / 學歷) — LINE webview 友善（避開 native select dropdown 失靈問題） */
+.radio-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 10px 8px;
+  border: 1.5px solid var(--line);
+  border-radius: var(--radius-sm);
+  background: white;
+  cursor: pointer;
+  font-size: 14px;
+  user-select: none;
+  white-space: nowrap;
+}
+.radio-btn input[type="radio"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+/* modifier：較大尺寸（如性別 2 選 1） */
+.radio-btn--lg { padding: 11px 12px; font-size: 15px; }
+.radio-btn--lg input[type="radio"] { width: 18px; height: 18px; }
+
 .form-row .radio-btn:has(input:checked) {
   border-color: var(--brand) !important;
   background: var(--brand-soft, #e6f0fa) !important;
