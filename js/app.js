@@ -849,7 +849,11 @@
         const q = allQuals.find(x => x.id === qid);
         return q ? q.label : qid;
       });
+      // v52: payload 多送 courseId 作為 server canonical 重建依據(server 用此 ID 從 catalog
+      // 重建 course 物件,不再信任前端送的 course.{name,type,session,...});
+      // course 仍送是為了向前相容,server 收到後會覆寫成 canonical 版本
       const payload = {
+        courseId: state.course && state.course.id,
         course: state.course,
         qualifications: state.qualifications,
         qualification_labels,
