@@ -806,6 +806,18 @@ main {
 .form-row.has-error select { border-color: var(--danger); }
 .form-row.has-error .err { display: block; }
 
+/* Radio button group (e.g. 性別) — LINE webview 友善（避開 native select dropdown 失靈問題） */
+.form-row .radio-btn:has(input:checked) {
+  border-color: var(--brand) !important;
+  background: var(--brand-soft, #e6f0fa) !important;
+  color: var(--brand);
+  font-weight: 700;
+}
+.form-row .radio-btn:active {
+  transform: scale(0.98);
+}
+.form-row.has-error .radio-btn { border-color: var(--danger) !important; }
+
 .form-2col {
   display: grid;
   grid-template-columns: 1fr 1fr;

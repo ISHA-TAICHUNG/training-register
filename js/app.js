@@ -461,11 +461,16 @@
             </div>
             <div class="form-row" data-field="gender">
               <label>性別 <span class="req">★</span></label>
-              <select name="gender" required>
-                <option value="">請選擇</option>
-                <option value="男" ${f.gender === '男' ? 'selected' : ''}>男</option>
-                <option value="女" ${f.gender === '女' ? 'selected' : ''}>女</option>
-              </select>
+              <div class="radio-group" style="display:flex;gap:10px;margin-top:4px">
+                <label class="radio-btn" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:11px 12px;border:1.5px solid var(--line);border-radius:var(--radius-sm);background:white;cursor:pointer;font-size:15px;user-select:none">
+                  <input type="radio" name="gender" value="男" ${f.gender === '男' ? 'checked' : ''} required style="width:18px;height:18px;cursor:pointer">
+                  <span>男</span>
+                </label>
+                <label class="radio-btn" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:11px 12px;border:1.5px solid var(--line);border-radius:var(--radius-sm);background:white;cursor:pointer;font-size:15px;user-select:none">
+                  <input type="radio" name="gender" value="女" ${f.gender === '女' ? 'checked' : ''} required style="width:18px;height:18px;cursor:pointer">
+                  <span>女</span>
+                </label>
+              </div>
               <div class="err">請選擇性別</div>
             </div>
           </div>
