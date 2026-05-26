@@ -816,7 +816,7 @@ main {
 .form-row .radio-btn:active {
   transform: scale(0.98);
 }
-.form-row.has-error .radio-btn { border-color: var(--danger) !important; }
+.form-row.has-error .radio-btn:not(:has(input:checked)) { border-color: var(--danger) !important; }
 
 .form-2col {
   display: grid;

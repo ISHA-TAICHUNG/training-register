@@ -501,12 +501,15 @@
           </div>
           <div class="form-2col">
             <div class="form-row" data-field="education">
-              <label>學歷 <span style="color:#c0392b">★</span></label>
-              <select name="education" required>
-                <option value="">請選擇</option>
-                ${EDUCATION_OPTIONS.map(v =>
-                  `<option value="${escape(v)}" ${f.education === v ? 'selected' : ''}>${escape(v)}</option>`).join("")}
-              </select>
+              <label>學歷 <span class="req">★</span></label>
+              <div class="radio-group" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:8px;margin-top:4px">
+                ${EDUCATION_OPTIONS.map((v, i) => `
+                <label class="radio-btn" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:10px 8px;border:1.5px solid var(--line);border-radius:var(--radius-sm);background:white;cursor:pointer;font-size:14px;user-select:none;white-space:nowrap">
+                  <input type="radio" name="education" value="${escape(v)}" ${f.education === v ? 'checked' : ''}${i === 0 ? ' required' : ''} style="width:16px;height:16px;cursor:pointer;flex-shrink:0">
+                  <span>${escape(v)}</span>
+                </label>`).join("")}
+              </div>
+              <div class="err">請選擇學歷</div>
             </div>
             <div class="form-row" data-field="school">
               <label>畢業學校</label>
