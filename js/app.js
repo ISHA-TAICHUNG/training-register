@@ -44,19 +44,34 @@
   // 嘗試預取名額資訊（非阻塞，失敗不影響流程）
   let COURSES_STATUS = null;
   let STATUS_FETCHED_AT = null;
-  API.fetchCoursesStatus().then(s => {
-    COURSES_STATUS = s;
-    STATUS_FETCHED_AT = new Date();
+  let STATUS_LOAD_STATE = "loading";
+  let statusRequestInFlight = false;
+
+  async function refreshCoursesStatus(force = false) {
+    if (statusRequestInFlight) return;
+    statusRequestInFlight = true;
+    STATUS_LOAD_STATE = "loading";
     if (state.step === 1 && window.__rerenderStep1) window.__rerenderStep1();
-    // 更新「名額更新於」時間戳
-    const tsEl = document.getElementById("status-timestamp");
-    if (tsEl && STATUS_FETCHED_AT) {
-      const t = STATUS_FETCHED_AT;
-      const hh = String(t.getHours()).padStart(2, "0");
-      const mm = String(t.getMinutes()).padStart(2, "0");
-      tsEl.textContent = `📅 名額更新於 ${hh}:${mm}（每 1 分鐘自動更新）`;
+
+    try {
+      const result = await API.fetchCoursesStatus(force);
+      if (!result) {
+        STATUS_LOAD_STATE = "error";
+        return;
+      }
+      COURSES_STATUS = result.courses;
+      STATUS_FETCHED_AT = new Date(result.fetchedAt);
+      STATUS_LOAD_STATE = "success";
+    } catch (error) {
+      console.warn("更新課程名額失敗", error);
+      STATUS_LOAD_STATE = "error";
+    } finally {
+      statusRequestInFlight = false;
+      if (state.step === 1 && window.__rerenderStep1) window.__rerenderStep1();
     }
-  });
+  }
+
+  refreshCoursesStatus();
 
   // 載入郵遞區號對照表（非阻塞）
   let ZIP_TO_AREA = {};
@@ -128,7 +143,8 @@
         const disabled = st && (st.status === "full" || st.status === "closed");
         let seatBadge;
         if (!st) {
-          seatBadge = `<span class="seat-badge seat-loading">名額查詢中</span>`;
+          const label = STATUS_LOAD_STATE === "error" ? "名額暫無法取得" : "名額查詢中";
+          seatBadge = `<span class="seat-badge seat-loading">${label}</span>`;
         } else if (st.status === "full") {
           seatBadge = `<span class="seat-badge seat-full">已額滿</span>`;
         } else if (st.status === "closed") {
@@ -156,6 +172,18 @@
       }).join("");
     };
 
+    const renderStatusMessage = () => {
+      if (STATUS_LOAD_STATE === "error") {
+        return `暫時無法取得即時名額，仍可繼續填寫；送出時系統會再次確認。
+          <button type="button" class="btn btn-ghost" id="btn-retry-status" style="margin-left:8px;padding:6px 10px">重新查詢名額</button>`;
+      }
+      if (STATUS_LOAD_STATE === "loading") return "名額查詢中…";
+      if (!STATUS_FETCHED_AT) return "";
+      const hh = String(STATUS_FETCHED_AT.getHours()).padStart(2, "0");
+      const mm = String(STATUS_FETCHED_AT.getMinutes()).padStart(2, "0");
+      return `名額資料取得於 ${hh}:${mm}`;
+    };
+
     const render = () => {
       renderHTML(app, `
         <div class="card">
@@ -171,7 +199,7 @@
             }).join("")}
           </div>
           <div id="course-list">${renderCourseList()}</div>
-          <div id="status-timestamp" style="text-align:right;font-size:12px;color:#666;margin-top:8px;padding-right:4px"></div>
+          <div id="status-timestamp" style="text-align:right;font-size:12px;color:#666;margin-top:8px;padding-right:4px">${renderStatusMessage()}</div>
         </div>
         <div class="btn-bar">
           <button class="btn btn-ghost" id="btn-home">返回首頁</button>
@@ -180,6 +208,8 @@
       `);
 
       document.getElementById("btn-home").addEventListener("click", () => { location.href = "index.html"; });
+      const retryStatusBtn = document.getElementById("btn-retry-status");
+      if (retryStatusBtn) retryStatusBtn.addEventListener("click", () => refreshCoursesStatus(true));
       app.querySelectorAll(".cat-tab").forEach(t => {
         t.addEventListener("click", () => { activeCat = t.dataset.cat; render(); });
       });

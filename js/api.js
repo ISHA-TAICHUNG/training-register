@@ -7,7 +7,7 @@
   /**
    * 取得所有課程剩餘名額
    * 優先使用 sessionStorage 快取，過期才打 API
-   * 失敗時回傳 null（前端顯示「查詢中」，不阻塞流程）
+   * 成功時回傳課程狀態與實際取得時間；失敗時回傳 null，不阻塞報名流程
    */
   async function fetchCoursesStatus(force = false) {
     const url = window.CONFIG.API_URL;
@@ -19,13 +19,13 @@
         const cached = sessionStorage.getItem(STATUS_CACHE_KEY);
         const cachedAt = parseInt(sessionStorage.getItem(STATUS_CACHE_TIME) || "0");
         if (cached && (Date.now() - cachedAt) < CACHE_TTL_MS) {
-          return JSON.parse(cached);
+          return { courses: JSON.parse(cached), fetchedAt: cachedAt };
         }
       } catch (e) {}
     }
-    // 5 秒 timeout（GET 名額查詢應快速）
+    // Apps Script 偶有冷啟動；20 秒涵蓋已觀測到的 18.9 秒成功回應。
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 5000);
+    const timeoutId = setTimeout(() => controller.abort(), 20 * 1000);
     try {
       const res = await fetch(url + "?action=courses", {
         mode: "cors",
@@ -34,14 +34,15 @@
       if (!res.ok) throw new Error("HTTP " + res.status);
       const data = await res.json();
       if (data.ok && data.courses) {
+        const fetchedAt = Date.now();
         try {
           sessionStorage.setItem(STATUS_CACHE_KEY, JSON.stringify(data.courses));
-          sessionStorage.setItem(STATUS_CACHE_TIME, String(Date.now()));
+          sessionStorage.setItem(STATUS_CACHE_TIME, String(fetchedAt));
         } catch (storageErr) {
           // sessionStorage 滿時無法快取，但不影響取得資料
           console.warn("名額快取無法寫入", storageErr);
         }
-        return data.courses;
+        return { courses: data.courses, fetchedAt };
       }
       return null;
     } catch (e) {
